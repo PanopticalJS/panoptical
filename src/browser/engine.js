@@ -320,6 +320,89 @@ export class PanopticalBrowser {
   }
 
   /**
+   * Hover over an element
+   */
+  async hover(selector) {
+    if (!this.page) {
+      throw new Error('Page not created. Call newPage() first.');
+    }
+
+    try {
+      await this.page.hover(selector);
+      return true;
+    } catch (error) {
+      console.error(`Hover failed: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Set input files for file upload
+   */
+  async setInputFiles(selector, filePath) {
+    if (!this.page) {
+      throw new Error('Page not created. Call newPage() first.');
+    }
+
+    try {
+      await this.page.setInputFiles(selector, filePath);
+      return true;
+    } catch (error) {
+      console.error(`Set input files failed: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Wait for a specific event
+   */
+  async waitForEvent(event, options = {}) {
+    if (!this.page) {
+      throw new Error('Page not created. Call newPage() first.');
+    }
+
+    try {
+      const result = await this.page.waitForEvent(event, options);
+      return result;
+    } catch (error) {
+      console.error(`Wait for event failed: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Get a locator for counting elements
+   */
+  locator(selector) {
+    if (!this.page) {
+      throw new Error('Page not created. Call newPage() first.');
+    }
+
+    try {
+      return this.page.locator(selector);
+    } catch (error) {
+      console.error(`Locator failed: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Access page request for API testing
+   */
+  get request() {
+    if (!this.page) {
+      throw new Error('Page not created. Call newPage() first.');
+    }
+
+    try {
+      return this.page.request;
+    } catch (error) {
+      console.error(`Request access failed: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
    * Close the browser
    */
   async close() {

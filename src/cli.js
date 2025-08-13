@@ -9,7 +9,7 @@ const args = process.argv.slice(2);
 const cmd = args[0];
 
 function showHelp() {
-  console.log(chalk.blue('\n🔍 Panoptical — See Everything, Test Everything'));
+  console.log(chalk.blue('\nPanoptical — See Everything, Test Everything'));
   console.log(chalk.cyan('A modern testing tool that makes Playwright easy to use with simple YAML syntax\n'));
   
   console.log(chalk.yellow('Usage:'));
@@ -39,12 +39,12 @@ function showHelp() {
   console.log(chalk.white('  panoptical run tests --headed --browser firefox # Run with options\n'));
   
   console.log(chalk.yellow('Features:'));
-  console.log(chalk.white('  🧪 Simple YAML test syntax'));
-  console.log(chalk.white('  🔧 Auto-healing selectors'));
-  console.log(chalk.white('  📊 Professional CLI output'));
-  console.log(chalk.white('  🚀 Playwright power made easy'));
-  console.log(chalk.white('  🎯 Built-in reliability features'));
-  console.log(chalk.white('  📹 Video recording on failure'));
+  console.log(chalk.white('  Simple YAML test syntax'));
+  console.log(chalk.white('  Auto-healing selectors'));
+  console.log(chalk.white('  Professional CLI output'));
+  console.log(chalk.white('  Playwright power made easy'));
+  console.log(chalk.white('  Built-in reliability features'));
+  console.log(chalk.white('  Video recording on failure'));
 }
 
 async function main() {
@@ -83,7 +83,7 @@ async function main() {
         
       default:
         if (cmd) {
-          console.error(chalk.red(`❌ Unknown command: ${cmd}`));
+          console.error(chalk.red(`Unknown command: ${cmd}`));
           console.log(chalk.yellow('Use "panoptical help" for available commands'));
           process.exit(1);
         } else {
@@ -91,7 +91,7 @@ async function main() {
         }
     }
   } catch (error) {
-    console.error(chalk.red('\n❌ Panoptical encountered an error:'));
+    console.error(chalk.red('\nPanoptical encountered an error:'));
     console.error(chalk.red(error instanceof Error ? error.message : String(error)));
     
     if (error instanceof Error && error.stack) {
@@ -155,7 +155,7 @@ function handleConfigCommand(args) {
       
     case 'set':
       if (args.length < 4) {
-        console.error(chalk.red('❌ Usage: panoptical config set <key> <value>'));
+        console.error(chalk.red('Usage: panoptical config set <key> <value>'));
         return;
       }
       config.set(args[2], args[3]);
@@ -171,7 +171,7 @@ function handleConfigCommand(args) {
       break;
       
     default:
-      console.log(chalk.blue('\n🔧 Configuration Management'));
+      console.log(chalk.blue('\nConfiguration Management'));
       console.log(chalk.blue('─'.repeat(40)));
       console.log(chalk.white('  panoptical config show              # Show current configuration'));
       console.log(chalk.white('  panoptical config set <key> <value> # Set configuration value'));
@@ -199,7 +199,7 @@ function handleConfigCommand(args) {
  * Show current configuration
  */
 function showCurrentConfig() {
-  console.log(chalk.blue('\n🔧 Current Configuration'));
+  console.log(chalk.blue('\nCurrent Configuration'));
   console.log(chalk.blue('─'.repeat(40)));
   
   const allConfig = config.getAll();
@@ -217,22 +217,22 @@ function showCurrentConfig() {
  * Validate configuration
  */
 function validateConfig() {
-  console.log(chalk.blue('\n🔧 Configuration Validation'));
+  console.log(chalk.blue('\nConfiguration Validation'));
   console.log(chalk.blue('─'.repeat(40)));
   
   const validation = config.validate();
   
   if (validation.valid) {
-    console.log(chalk.green('✅ Configuration is valid'));
+    console.log(chalk.green('Configuration is valid'));
   } else {
-    console.log(chalk.red('❌ Configuration has errors:'));
+    console.log(chalk.red('Configuration has errors:'));
     validation.errors.forEach(error => {
       console.log(chalk.red(`  • ${error}`));
     });
   }
   
   if (validation.warnings.length > 0) {
-    console.log(chalk.yellow('\n⚠️  Warnings:'));
+    console.log(chalk.yellow('\nWarnings:'));
     validation.warnings.forEach(warning => {
       console.log(chalk.yellow(`  • ${warning}`));
     });
@@ -349,7 +349,7 @@ async function handleVideosCommand(args) {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  console.error(chalk.red('\n❌ Unhandled Promise Rejection:'));
+      console.error(chalk.red('\nUnhandled Promise Rejection:'));
   console.error(chalk.red(reason));
   process.exit(1);
 });

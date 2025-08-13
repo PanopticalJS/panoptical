@@ -16,7 +16,7 @@ steps:
   - click: '#demo-button'
   - expect:
       selector: '#demo-output'
-      text: 'Hello Panoptical!2'
+      text: 'Hello Panoptical!'
   - pause: 1000
   - snapshot: 'demo-success'
 teardown:
