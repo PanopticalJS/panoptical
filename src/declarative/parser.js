@@ -173,15 +173,54 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
       }
       
       if (step.click) {
-        await browser.waitForSelector(step.click);
-        await browser.click(step.click);
-        console.log(chalk.green(`✓ Clicked`) + ` ${step.click}`);
+        if (typeof step.click === 'string') {
+          await browser.waitForSelector(step.click);
+          await browser.click(step.click);
+          console.log(chalk.green(`✓ Clicked`) + ` ${step.click}`);
+        } else if (step.click.text) {
+          const timeout = step.click.timeout || browser.browser.options.timeout;
+          const page = browser.getPage();
+          await page.waitForFunction(
+            (searchText) => {
+              if (!document || !document.body) return false;
+              return document.body.innerText && document.body.innerText.includes(searchText);
+            },
+            step.click.text,
+            { timeout }
+          );
+          await page.click(`text="${step.click.text}"`);
+          console.log(chalk.green(`✓ Clicked`) + ` "${step.click.text}"`);
+        } else if (step.click.selector) {
+          const timeout = step.click.timeout || browser.browser.options.timeout;
+          await browser.waitForSelector(step.click.selector, timeout);
+          await browser.click(step.click.selector);
+          console.log(chalk.green(`✓ Clicked`) + ` ${step.click.selector}`);
+        } else {
+          throw new Error('click action must specify either a string selector, text, or selector object');
+        }
       }
       
       if (step.type) {
         await browser.waitForSelector(step.type.selector);
         await browser.type(step.type.selector, step.type.text);
         console.log(chalk.green(`✓ Typed`) + ` "${step.type.text}" ` + chalk.green(`into`) + ` ${step.type.selector}`);
+      }
+      
+      if (step.selectOption) {
+        await browser.waitForSelector(step.selectOption.selector);
+        await browser.selectOption(step.selectOption.selector, step.selectOption.value);
+        console.log(chalk.green(`✓ Selected`) + ` "${step.selectOption.value}" ` + chalk.green(`from`) + ` ${step.selectOption.selector}`);
+      }
+      
+      if (step.evaluate) {
+        await browser.waitForSelector(step.evaluate.selector);
+        await browser.evaluate(step.evaluate.script, step.evaluate.selector);
+        console.log(chalk.green(`✓ Executed script on`) + ` ${step.evaluate.selector}`);
+      }
+      
+      if (step.randomFill) {
+        await browser.randomFill(step.randomFill);
+        console.log(chalk.green(`✓ Form filled with random data`));
       }
       
       if (step.expect) {
@@ -196,7 +235,16 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
       if (step.wait) {
         if (step.wait.text) {
           const timeout = step.wait.timeout || browser.browser.options.timeout;
-          await browser.waitForText(step.wait.text, timeout);
+          // Wait for text to appear using page.waitForFunction
+          const page = browser.getPage();
+          await page.waitForFunction(
+            (searchText) => {
+              if (!document || !document.body) return false;
+              return document.body.innerText && document.body.innerText.includes(searchText);
+            },
+            step.wait.text,
+            { timeout }
+          );
           console.log(chalk.green(`✓ Text found:`) + ` "${step.wait.text}"`);
         } else if (step.wait.selector) {
           const timeout = step.wait.timeout || browser.browser.options.timeout;

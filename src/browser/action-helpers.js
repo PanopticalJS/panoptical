@@ -1013,15 +1013,52 @@ export class ActionHelpers {
    */
   async executeStep(step) {
     if (step.click) {
-      await this.browser.click(step.click);
+      // Enhanced click action that handles multiple formats
+      if (typeof step.click === 'string') {
+        // Traditional selector click: click: "#button"
+        await this.browser.click(step.click);
+      } else if (step.click.text) {
+        // Text-based click: click: text: "Button Text"
+        const page = this.getPage();
+        const timeout = step.click.timeout || 30000;
+        
+        // Wait for the text to be available
+        await page.waitForFunction(
+          (searchText) => {
+            if (!document || !document.body) return false;
+            return document.body.innerText && document.body.innerText.includes(searchText);
+          },
+          step.click.text,
+          { timeout }
+        );
+        
+        // Click on the element with the matching text
+        await page.click(`text="${step.click.text}"`);
+      } else if (step.click.selector) {
+        // Selector with timeout: click: selector: "#button", timeout: 5000
+        const timeout = step.click.timeout || 30000;
+        await this.browser.waitForSelector(step.click.selector, timeout);
+        await this.browser.click(step.click.selector);
+      } else {
+        throw new Error('click action must specify either a string selector, text, or selector object');
+      }
     } else if (step.type) {
       await this.browser.type(step.type.selector, step.type.text);
+    } else if (step.selectOption) {
+      await this.browser.selectOption(step.selectOption.selector, step.selectOption.value);
+    } else if (step.evaluate) {
+      await this.browser.evaluate(step.evaluate.script, step.evaluate.selector);
+    } else if (step.randomFill) {
+      await this.randomFill(step.randomFill);
     } else if (step.wait) {
       if (step.wait.text) {
         const page = this.getPage();
         const timeout = step.wait.timeout || 30000;
         await page.waitForFunction(
-          (searchText) => document.body.innerText.includes(searchText),
+          (searchText) => {
+            if (!document || !document.body) return false;
+            return document.body.innerText && document.body.innerText.includes(searchText);
+          },
           step.wait.text,
           { timeout }
         );
