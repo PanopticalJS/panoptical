@@ -1,4 +1,4 @@
-# 🧪 Panoptical — See Everything, Test Everything
+# Panoptical — Playwright Made Simple, Testing Made Delightful
 
 **A modern, unified browser automation tool that makes Playwright easy to use with simple YAML syntax.**
 
@@ -6,24 +6,72 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![Playwright](https://img.shields.io/badge/Playwright-1.54+-blue.svg)](https://playwright.dev/)
 
-## 🚀 **What is Panoptical?**
+## **What is Panoptical?**
 
 **Panoptical is a testing tool that makes Playwright easy to use.** Instead of writing complex JavaScript code, you write simple YAML files that Panoptical converts into Playwright commands.
 
 ### **Why Use Panoptical Instead of Raw Playwright?**
 
-| **With Raw Playwright** | **With Panoptical** |
-|-------------------------|---------------------|
-| ```javascript<br>const browser = await chromium.launch();<br>const page = await browser.newPage();<br>await page.goto('https://example.com');<br>await page.click('#button');<br>await page.screenshot({path: 'test.png'});<br>await browser.close();``` | ```yaml<br>test: "Simple Test"<br>steps:<br>  - goto: "https://example.com"<br>  - click: "#button"<br>  - snapshot: "test"``` |
+**Raw Playwright (Complex JavaScript):**
+```javascript
+const browser = await chromium.launch();
+const page = await browser.newPage();
+await page.goto('https://example.com');
+await page.click('#button');
+await page.screenshot({path: 'test.png'});
+await browser.close();
+```
+
+**Panoptical (Simple YAML):**
+```yaml
+test: 'Simple Test'
+steps:
+  - goto: 'https://example.com'
+  - click: '#button'
+  - snapshot: 'test'
+```
 
 **Panoptical gives you:**
-- ✅ **Simple YAML syntax** - No JavaScript coding required
-- ✅ **Auto-healing selectors** - Automatically fix failing selectors
-- ✅ **Professional CLI** - Clean, colored output with human-readable timing
-- ✅ **Built-in reliability** - Auto-retries, failure screenshots
-- ✅ **Playwright's power** - All the browser automation capabilities
+- **Simple YAML syntax** - No JavaScript coding required
+- **Auto-healing selectors** - Automatically fix failing selectors
+- **Professional CLI** - Clean, colored output with human-readable timing
+- **Built-in reliability** - Auto-retries, failure screenshots
+- **Playwright's power** - All the browser automation capabilities
+- **Advanced Features** - High-level automation methods that make testing delightful
 
-## 🎯 **Quick Start**
+## **20 Advanced Features That Make Testing Delightful**
+
+Panoptical includes **powerful automation methods** that transform it from a basic tool into a **high-level testing framework**. These features make complex testing scenarios simple and enjoyable:
+
+### ** Core Browser Actions**
+- **`login`** - Smart authentication with automatic verification
+- **`logout`** - Clean session management with verification
+- **`goto_with_auth`** - Navigate to protected pages with auth tokens
+- **`wait_for_text`** - Wait for specific text to appear anywhere
+- **`click_if_visible`** - Smart clicking that won't fail
+
+### ** UI Interaction Helpers**
+- **`select_from_dropdown`** - Human-friendly dropdown selection by text
+- **`hover_and_click`** - Complex menu navigation made simple
+- **`upload_file`** - File upload with automatic verification
+- **`download_and_verify`** - Download and verify file contents
+- **`take_screenshot`** - Named screenshots for better debugging
+
+### ** Data & Verification**
+- **`verify_table_row`** - Verify table data without complex selectors
+- **`assert_element_count`** - Check element quantities with operators
+- **`check_api_response`** - API testing from UI tests
+- **`assert_element_not_present`** - Verify elements are removed
+- **`measure_performance`** - Built-in performance monitoring
+
+### ** Flow Control**
+- **`repeat`** - Loop through actions multiple times
+- **`run_if`** - Conditional execution based on conditions
+- **`store_text`** - Save values in variables for later use
+- **`compare_values`** - Compare values with flexible operators
+- **`random_fill`** - Generate random test data automatically
+
+## **Quick Start**
 
 ### **Installation**
 
@@ -53,7 +101,6 @@ steps:
   - goto: "https://example.com/login"
   - wait:
       selector: "#username"
-      timeout: 5000
   - type:
       selector: "#username"
       text: "testuser"
@@ -64,6 +111,39 @@ steps:
   - expect:
       selector: "#dashboard"
       text: "Welcome"
+```
+
+### **Advanced Test Example**
+
+```yaml
+test: 'Advanced User Journey'
+steps:
+  # Smart login with verification
+  - login:
+      username: 'test@example.com'
+      password: 'password123'
+      usernameSelector: '#email'
+      passwordSelector: '#password'
+      successIndicator: '.dashboard'
+  
+  # Wait for welcome message
+  - wait_for_text:
+      text: 'Welcome back'
+      timeout: 5000
+  
+  # Fill form with random data
+  - random_fill:
+      formData:
+        '#first-name': 'firstName'
+        '#email': 'email'
+        '#company': 'company'
+  
+  # Verify table data
+  - verify_table_row:
+      tableSelector: '#users-table'
+      expectedRow:
+        'Name': 'John Doe'
+        'Role': 'User'
 ```
 
 ### **Run the Test**
@@ -83,7 +163,7 @@ panoptical run tests --browser webkit
 panoptical run tests/example.yaml --headed
 ```
 
-## 🔧 **Core Features**
+## **Core Features**
 
 ### **1. Playwright Made Simple**
 - **All Playwright browsers**: Chromium, Firefox, WebKit
@@ -201,7 +281,7 @@ panoptical videos clean-old 7
 }
 ```
 
-## 📁 **Project Structure**
+## **Project Structure**
 
 ```
 panoptical/
@@ -222,7 +302,7 @@ panoptical/
 └── README.md              # This file
 ```
 
-## ⚙️ **Configuration**
+## **Configuration**
 
 ### **Command Line Options**
 
@@ -262,7 +342,7 @@ export PANOPTICAL_HEADLESS=true
 export PANOPTICAL_TIMEOUT=60000
 ```
 
-## 🧪 **Advanced Testing**
+## **Advanced Testing**
 
 ### **Complex Test Scenarios**
 
@@ -320,7 +400,7 @@ steps:
       text: "testuser"
 ```
 
-## 🚀 **Performance & Scale**
+## **Performance & Scale**
 
 ### **Test Execution**
 
@@ -335,8 +415,8 @@ panoptical run tests/smoke.yaml
 panoptical run tests --browser firefox
 panoptical run tests --browser webkit
 
-# Run in headless mode for CI/CD
-panoptical run tests --headless
+# Run in browser visible mode
+panoptical run tests --headed
 ```
 
 ### **CI/CD Integration**
@@ -355,10 +435,10 @@ jobs:
           node-version: '18'
       - run: npm install
       - run: npx playwright install
-      - run: panoptical run tests --headless
+      - run: panoptical run tests
 ```
 
-## 🔍 **Debugging & Troubleshooting**
+## **Debugging & Troubleshooting**
 
 ### **Common Issues**
 
@@ -389,7 +469,7 @@ jobs:
 - **Auto-healing feedback**: See which selectors are being healed
 - **Human-readable timing**: Test durations in minutes/seconds format
 
-## 📊 **Available Commands**
+## **Available Commands**
 
 ```bash
 # Test execution
@@ -419,7 +499,7 @@ panoptical analyze-flakes
 panoptical help
 ```
 
-## 🤝 **Contributing**
+## **Contributing**
 
 We welcome contributions! Here's how to get started:
 
@@ -438,14 +518,14 @@ npm install
 npx playwright install
 
 # Run tests
-panoptical run tests --headed
+panoptical run tests
 ```
 
-## 📄 **License**
+## **License**
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 **Acknowledgments**
+## **Acknowledgments**
 
 - Built on top of [Playwright](https://playwright.dev/) for robust browser automation
 - Inspired by modern testing frameworks and developer experience
