@@ -1,22 +1,85 @@
-test: Panoptical Showcase Test
-description: Comprehensive demonstration of Panoptical's testing framework capabilities with real browser automation
-setup:
-  - goto: 'https://panoptical.dev/testing/test-page.html'
+test: WooCommerce Shop to Order Confirmation Demo
+description: Complete demonstration from shop navigation to order confirmation
 steps:
+  # Navigate to shop
+  - goto: 'https://panopticaltesting.instawp.site/shop/'
+  
+  # Wait for shop page to load
   - wait:
-      selector: 'body'
-  - click: '#demo-button'
-  - expect:
-      selector: '#demo-output'
-      text: 'Button clicked!'
+      text: 'Shop'
+  
+  # Click on product title using text
+  - click:
+      text: 'Gorgeous Concrete Plate'
+  
+  # Wait for product page
+  - wait:
+      text: 'gorgeous-concrete-plate-64873398'
+  
+  # Add to cart using text
+  - click:
+      text: 'Add to cart'
+  
+  # Wait for success message
+  - wait:
+      text: '“Gorgeous Concrete Plate” has been added to your cart.'
+  
+  # View cart using text
+  - click:
+      text: 'View cart'
+  
+  # Wait for cart page
+  - wait:
+      text: 'Cart'
+  
+  # Wait for checkout button
+  - wait:
+      selector: '.wc-block-components-button__text'
+  
+  # Proceed to checkout using text
+  - click:
+      text: 'Proceed to Checkout'
+  
+  # Wait for checkout page to load
+  - wait:
+      selector: '.wc-block-checkout'
+  
+  # Fill all form fields with random data using randomFill
+  - randomFill:
+      '#email': 'email'
+      '#billing-first_name': 'firstName'
+      '#billing-last_name': 'lastName'
+      '#billing-address_1': 'address'
+      '#billing-phone': 'phone'
+  
+  # Fill Billing City
+  - wait:
+      selector: '#billing-city'
   - type:
-      selector: '#demo-input'
-      text: 'Hello Panoptical!'
-  - click: '#demo-button'
-  - expect:
-      selector: '#demo-output'
-      text: 'Hello Panoptical!'
-  - pause: 1000
-  - snapshot: 'demo-success'
-teardown:
-  - click: '#reset-button'
+      selector: '#billing-city'
+      text: 'Los Angeles'
+  
+  # Fill BillingZIP Code
+  - wait:
+      selector: '#billing-postcode'
+  - type:
+      selector: '#billing-postcode'
+      text: '96000'
+  
+  # Accept Terms and Conditions
+  - wait:
+      selector: '#checkbox-control-1'
+  - click: '#checkbox-control-1'
+  
+  # Wait for Place Order button to be enabled
+  - wait:
+      selector: '.wc-block-components-checkout-place-order-button'
+  
+  # Place the order
+  - click:
+      text: 'Place Order'
+  
+  # Wait for order confirmation
+  - wait:
+      text: 'Order received'
+
