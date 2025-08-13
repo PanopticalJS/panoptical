@@ -39,7 +39,7 @@ steps:
 - **Playwright's power** - All the browser automation capabilities
 - **Advanced Features** - High-level automation methods that make testing delightful
 
-## ** Advanced Features That Make Testing Delightful**
+## **Advanced Features That Make Testing Delightful**
 
 Panoptical includes **powerful automation methods** that transform it from a basic tool into a **high-level testing framework**. These features make complex testing scenarios simple and enjoyable:
 
