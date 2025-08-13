@@ -205,11 +205,11 @@ steps:
 ### **Run the Test**
 
 ```bash
-# Run with visible browser (default)
-panoptical run tests
+# Run with visible browser
+panoptical run tests --headed
 
-# Run in headless mode
-panoptical run tests --headless
+# Run in headless mode (default)
+panoptical run tests
 
 # Use specific browser
 panoptical run tests --browser firefox
@@ -368,8 +368,8 @@ panoptical/
 --browser webkit      # Use WebKit
 
 # Visibility mode
---headed             # Visible browser (default)
---headless           # Hidden browser
+--headed             # Visible browser
+--headless           # Hidden browser (default)
 
 # Performance
 --timeout 30000      # Default timeout (ms)
@@ -467,9 +467,6 @@ panoptical run tests/smoke.yaml
 # Run with different browsers
 panoptical run tests --browser firefox
 panoptical run tests --browser webkit
-
-# Run in browser visible mode
-panoptical run tests --headed
 ```
 
 ### **CI/CD Integration**
