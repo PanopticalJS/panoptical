@@ -1,0 +1,15 @@
+test: Auto-healing Success Demo
+description: Demonstrates successful auto-healing of selectors
+steps:
+  - goto: 'https://panoptical.dev/testing/test-page.html'
+  - wait:
+      selector: body
+  # This selector will fail but auto-healing should find the button by text
+  - click: 'Click Me!'
+  # This selector will fail but auto-healing should find the input by ID
+  - type:
+      selector: 'input'
+      text: 'Testing auto-healing'
+  - expect:
+      selector: '#demo-output'
+      text: 'Button clicked!'
