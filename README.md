@@ -43,28 +43,28 @@ steps:
 
 Panoptical includes **powerful automation methods** that transform it from a basic tool into a **high-level testing framework**. These features make complex testing scenarios simple and enjoyable:
 
-### ** Core Browser Actions**
+### **Core Browser Actions**
 - **`login`** - Smart authentication with automatic verification
 - **`logout`** - Clean session management with verification
 - **`goto_with_auth`** - Navigate to protected pages with auth tokens
 - **`wait_for_text`** - Wait for specific text to appear anywhere
 - **`click_if_visible`** - Smart clicking that won't fail
 
-### ** UI Interaction Helpers**
+### **UI Interaction Helpers**
 - **`select_from_dropdown`** - Human-friendly dropdown selection by text
 - **`hover_and_click`** - Complex menu navigation made simple
 - **`upload_file`** - File upload with automatic verification
 - **`download_and_verify`** - Download and verify file contents
 - **`take_screenshot`** - Named screenshots for better debugging
 
-### ** Data & Verification**
+### **Data & Verification**
 - **`verify_table_row`** - Verify table data without complex selectors
 - **`assert_element_count`** - Check element quantities with operators
 - **`check_api_response`** - API testing from UI tests
 - **`assert_element_not_present`** - Verify elements are removed
 - **`measure_performance`** - Built-in performance monitoring
 
-### ** Flow Control**
+### **Flow Control**
 - **`repeat`** - Loop through actions multiple times
 - **`run_if`** - Conditional execution based on conditions
 - **`store_text`** - Save values in variables for later use
@@ -75,19 +75,23 @@ Panoptical includes **powerful automation methods** that transform it from a bas
 
 ### **Installation**
 
+**Prerequisites:**
+- Node.js 18+ 
+- pnpm (recommended) or npm
+
 ```bash
 # Clone the repository
 git clone <your-repo-url>
 cd panoptical
 
 # Install dependencies
-npm install
+pnpm install
 
 # Install Playwright browsers
-npx playwright install
+pnpm exec playwright install
 
 # Make Panoptical globally available
-npm link
+pnpm link --global
 ```
 
 ### **Your First Test**
@@ -353,13 +357,11 @@ setup:
   - goto: "https://shop.example.com"
   - wait:
       selector: ".product-grid"
-      timeout: 10000
 steps:
   # Product selection
   - click: ".product-card:first-child"
   - wait:
       selector: "#add-to-cart"
-      timeout: 5000
   - click: "#add-to-cart"
   
   # Cart management
@@ -433,8 +435,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '18'
-      - run: npm install
-      - run: npx playwright install
+      - run: pnpm install
+      - run: pnpm exec playwright install
       - run: panoptical run tests
 ```
 
@@ -445,7 +447,7 @@ jobs:
 1. **Browser not launching**
    ```bash
    # Install browser binaries
-   npx playwright install
+   pnpm exec playwright install
    ```
 
 2. **Element not found**
@@ -453,7 +455,7 @@ jobs:
    # Increase timeout
    - wait:
        selector: "#element"
-       timeout: 10000
+       timeout: 40000
    ```
 
 3. **Test flakiness**
@@ -514,8 +516,8 @@ We welcome contributions! Here's how to get started:
 ```bash
 git clone <your-repo-url>
 cd panoptical
-npm install
-npx playwright install
+pnpm install
+pnpm exec playwright install
 
 # Run tests
 panoptical run tests
