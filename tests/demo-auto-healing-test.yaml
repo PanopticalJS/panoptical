@@ -2,7 +2,7 @@ test: Auto-healing Success Demo
 description: Demonstrates successful auto-healing of selectors
 steps:
   - goto: 'https://panoptical.dev/testing/test-page.html'
-  - wait_for_element:
+  - wait:
       selector: body
   # This selector will fail but auto-healing should find the button by text
   - click: 'Click Me!'
