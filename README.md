@@ -71,6 +71,18 @@ Panoptical includes **powerful automation methods** that transform it from a bas
 - **`compare_values`** - Compare values with flexible operators
 - **`random_fill`** - Generate random test data automatically
 
+### **Mobile & Responsive Testing**
+- **`resize_viewport`** - Test responsive design with custom dimensions
+- **`swipe`** - Perform swipe gestures (left, right, up, down)
+- **`tap`** - Simulate mobile tap interactions
+
+### **Advanced Element Interactions**
+- **`drag_and_drop`** - Drag elements to targets with precision
+- **`multi_select`** - Select multiple options from checkboxes/dropdowns
+- **`press_keys`** - Keyboard shortcuts and key combinations
+- **`scroll_to_element`** - Scroll to make elements visible
+- **`hover_element`** - Hover interactions with configurable duration
+
 ## **Quick Start**
 
 ### **Installation**
@@ -148,6 +160,45 @@ steps:
       expectedRow:
         'Name': 'John Doe'
         'Role': 'User'
+```
+
+### **Mobile & Advanced Interactions Example**
+
+```yaml
+test: 'Mobile E-commerce Test'
+steps:
+  # Test responsive design
+  - resize_viewport:
+      width: 375
+      height: 667
+      device: 'iPhone SE'
+  
+  # Navigate and interact
+  - goto: 'https://store.example.com'
+  - swipe:
+      selector: '.product-carousel'
+      direction: 'left'
+      distance: 200
+  
+  # Advanced interactions
+  - drag_and_drop:
+      source: '#product-item'
+      target: '#shopping-cart'
+  
+  - multi_select:
+      selector: '.size-options'
+      options: ['Small', 'Medium']
+  
+  - press_keys:
+      keys: ['Control', 'A']
+      targetSelector: '#search-input'
+  
+  - scroll_to_element:
+      selector: '#checkout-button'
+  
+  - hover_element:
+      selector: '.tooltip-trigger'
+      duration: 2000
 ```
 
 ### **Run the Test**
