@@ -168,10 +168,8 @@ export class PanopticalCompatibility {
     return this.browser.getVideoPath();
   }
 
-  // ===== New Action Helper Methods =====
-
   /**
-   * 1. login - Logs in with username/password
+   * login - Logs in with username/password
    */
   async login(credentials) {
     if (!this.actions) {
@@ -181,7 +179,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 2. logout - Logs out and verifies redirect
+   * logout - Logs out and verifies redirect
    */
   async logout(logoutSelector, loginPageIndicator) {
     if (!this.actions) {
@@ -191,7 +189,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 3. goto_with_auth - Navigates with auth token
+   * goto_with_auth - Navigates with auth token
    */
   async gotoWithAuth(url, authToken, tokenHeader) {
     if (!this.actions) {
@@ -201,17 +199,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 4. wait_for_text - Waits for text to appear
-   */
-  async waitForText(text, timeout) {
-    if (!this.actions) {
-      throw new Error('Browser not launched. Call launch() first.');
-    }
-    return await this.actions.waitForText(text, timeout);
-  }
-
-  /**
-   * 5. click_if_visible - Clicks only if visible
+   * click_if_visible - Clicks only if visible
    */
   async clickIfVisible(selector, options) {
     if (!this.actions) {
@@ -221,7 +209,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 6. select_from_dropdown - Selects dropdown option by text
+   * select_from_dropdown - Selects dropdown option by text
    */
   async selectFromDropdown(selector, optionText, options) {
     if (!this.actions) {
@@ -231,7 +219,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 7. hover_and_click - Hover then click submenu
+   * hover_and_click - Hover then click submenu
    */
   async hoverAndClick(hoverSelector, clickSelector, options) {
     if (!this.actions) {
@@ -241,7 +229,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 8. upload_file - Uploads and verifies file
+   * upload_file - Uploads and verifies file
    */
   async uploadFile(fileInputSelector, filePath, successIndicator) {
     if (!this.actions) {
@@ -251,7 +239,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 9. download_and_verify - Downloads and verifies file
+   * download_and_verify - Downloads and verifies file
    */
   async downloadAndVerify(downloadSelector, expectedSize, expectedContent) {
     if (!this.actions) {
@@ -261,7 +249,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 10. take_screenshot - Takes named screenshot
+   * take_screenshot - Takes named screenshot
    */
   async takeScreenshot(name, options) {
     if (!this.actions) {
@@ -271,7 +259,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 11. verify_table_row - Verifies table contains specific row
+   * verify_table_row - Verifies table contains specific row
    */
   async verifyTableRow(tableSelector, expectedRow) {
     if (!this.actions) {
@@ -281,7 +269,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 12. assert_element_count - Asserts element count
+   * assert_element_count - Asserts element count
    */
   async assertElementCount(selector, expectedCount, operator) {
     if (!this.actions) {
@@ -291,7 +279,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 13. check_api_response - Checks API response
+   * check_api_response - Checks API response
    */
   async checkApiResponse(url, method, headers, body, expectedStatus, expectedContent) {
     if (!this.actions) {
@@ -301,7 +289,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 14. assert_element_not_present - Asserts element doesn't exist
+   * assert_element_not_present - Asserts element doesn't exist
    */
   async assertElementNotPresent(selector, timeout) {
     if (!this.actions) {
@@ -311,7 +299,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 15. measure_performance - Measures performance
+   * measure_performance - Measures performance
    */
   async measurePerformance(action, options) {
     if (!this.actions) {
@@ -321,7 +309,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 16. repeat - Repeats steps
+   * repeat - Repeats steps
    */
   async repeat(steps, count, options) {
     if (!this.actions) {
@@ -331,7 +319,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 17. run_if - Runs steps conditionally
+   * run_if - Runs steps conditionally
    */
   async runIf(condition, steps, options) {
     if (!this.actions) {
@@ -341,7 +329,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 18. store_text - Stores text in variable
+   * store_text - Stores text in variable
    */
   async storeText(selector, variableName) {
     if (!this.actions) {
@@ -351,7 +339,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 19. compare_values - Compares values
+   * compare_values - Compares values
    */
   async compareValues(value1, value2, operator, options) {
     if (!this.actions) {
@@ -361,7 +349,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 20. random_fill - Fills form with random data
+   * random_fill - Fills form with random data
    */
   async randomFill(formData) {
     if (!this.actions) {
@@ -373,7 +361,7 @@ export class PanopticalCompatibility {
   // ===== Mobile & Responsive Testing =====
 
   /**
-   * 21. resize_viewport - Resizes viewport for responsive testing
+   * resize_viewport - Resizes viewport for responsive testing
    */
   async resizeViewport(width, height, device) {
     if (!this.actions) {
@@ -383,7 +371,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 22. swipe - Performs swipe gesture
+   * swipe - Performs swipe gesture
    */
   async swipe(selector, direction, distance) {
     if (!this.actions) {
@@ -393,7 +381,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 23. tap - Performs tap gesture
+   * tap - Performs tap gesture
    */
   async tap(selector, pressure) {
     if (!this.actions) {
@@ -405,7 +393,7 @@ export class PanopticalCompatibility {
   // ===== Advanced Element Interactions =====
 
   /**
-   * 24. drag_and_drop - Drags and drops elements
+   * drag_and_drop - Drags and drops elements
    */
   async dragAndDrop(sourceSelector, targetSelector) {
     if (!this.actions) {
@@ -415,7 +403,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 25. multi_select - Selects multiple options
+   * multi_select - Selects multiple options
    */
   async multiSelect(selector, options) {
     if (!this.actions) {
@@ -425,7 +413,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 26. press_keys - Presses keyboard keys
+   * press_keys - Presses keyboard keys
    */
   async pressKeys(keys, targetSelector) {
     if (!this.actions) {
@@ -435,7 +423,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 27. scroll_to_element - Scrolls to element
+   * scroll_to_element - Scrolls to element
    */
   async scrollToElement(selector, behavior) {
     if (!this.actions) {
@@ -445,7 +433,7 @@ export class PanopticalCompatibility {
   }
 
   /**
-   * 28. hover_element - Hovers over element
+   * hover_element - Hovers over element
    */
   async hoverElement(selector, duration) {
     if (!this.actions) {
