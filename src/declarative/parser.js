@@ -163,8 +163,9 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
         try {
           await browser.waitForLoadState();
         } catch (e) {
-          // Fallback: wait for body element
-          await browser.waitForSelector('body', 10000);
+          // Fallback: wait for body element (use 1/3 of browser timeout)
+          const fallbackTimeout = Math.floor(browser.browser.options.timeout / 3);
+          await browser.waitForSelector('body', fallbackTimeout);
         }
         
         // Navigation completed successfully
@@ -180,7 +181,7 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
       if (step.type) {
         await browser.waitForSelector(step.type.selector);
         await browser.type(step.type.selector, step.type.text);
-        console.log(chalk.green(`✓ Typed`) + ` "${step.type.text}" into ${step.type.selector}`);
+        console.log(chalk.green(`✓ Typed`) + ` "${step.type.text}" ` + chalk.green(`into`) + ` ${step.type.selector}`);
       }
       
       if (step.expect) {
@@ -192,10 +193,10 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
         console.log(chalk.green(`✓ Text verified:`) + ` "${step.expect.text}"`);
       }
       
-      if (step.wait) {
-        const timeout = step.wait.timeout || 10000; // Increased default timeout
-        await browser.waitForSelector(step.wait.selector, timeout);
-        console.log(chalk.green(`✓ Element ready:`) + ` ${step.wait.selector}`);
+      if (step.wait_for_element) {
+        const timeout = step.wait_for_element.timeout || browser.browser.options.timeout;
+        await browser.waitForSelector(step.wait_for_element.selector, timeout);
+        console.log(chalk.green(`✓ Element ready:`) + ` ${step.wait_for_element.selector}`);
       }
       
       if (step.snapshot) {
@@ -232,7 +233,7 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
       // 4. wait_for_text - Waits for text to appear
       if (step.wait_for_text) {
         const { text, timeout } = step.wait_for_text;
-        await browser.waitForText(text, timeout);
+        await browser.waitForText(text, timeout || browser.browser.options.timeout);
       }
 
       // 5. click_if_visible - Clicks only if visible
@@ -292,7 +293,7 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
       // 14. assert_element_not_present - Asserts element doesn't exist
       if (step.assert_element_not_present) {
         const { selector, timeout } = step.assert_element_not_present;
-        await browser.assertElementNotPresent(selector, timeout);
+        await browser.assertElementNotPresent(selector, timeout || browser.browser.options.timeout);
       }
 
       // 15. measure_performance - Measures performance

@@ -47,6 +47,7 @@ Panoptical includes **powerful automation methods** that transform it from a bas
 - **`login`** - Smart authentication with automatic verification
 - **`logout`** - Clean session management with verification
 - **`goto_with_auth`** - Navigate to protected pages with auth tokens
+- **`wait_for_element`** - Wait for an element to appear with configurable timeout
 - **`wait_for_text`** - Wait for specific text to appear anywhere
 - **`click_if_visible`** - Smart clicking that won't fail
 
@@ -115,7 +116,7 @@ test: "Simple Login Test"
 description: "Test user authentication flow"
 steps:
   - goto: "https://example.com/login"
-  - wait:
+  - wait_for_element:
       selector: "#username"
   - type:
       selector: "#username"
@@ -243,9 +244,8 @@ panoptical run tests/example.yaml --headed
     text: "Success"
 
 # Waiting
-- wait:
+- wait_for_element:
     selector: "#element"
-    timeout: 5000
 
 # Screenshots
 - snapshot: "test-result"
@@ -406,12 +406,12 @@ test: "E-commerce Checkout Flow"
 description: "Complete purchase process testing"
 setup:
   - goto: "https://shop.example.com"
-  - wait:
+  - wait_for_element:
       selector: ".product-grid"
 steps:
   # Product selection
   - click: ".product-card:first-child"
-  - wait:
+  - wait_for_element:
       selector: "#add-to-cart"
   - click: "#add-to-cart"
   
@@ -504,7 +504,7 @@ jobs:
 2. **Element not found**
    ```yaml
    # Increase timeout
-   - wait:
+   - wait_for_element:
        selector: "#element"
        timeout: 40000
    ```

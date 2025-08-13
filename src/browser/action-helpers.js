@@ -1040,8 +1040,8 @@ export class ActionHelpers {
       await this.browser.click(step.click);
     } else if (step.type) {
       await this.browser.type(step.type.selector, step.type.text);
-    } else if (step.wait) {
-      await this.browser.waitForSelector(step.wait.selector, step.wait.timeout);
+    } else if (step.wait_for_element) {
+      await this.browser.waitForSelector(step.wait_for_element.selector, step.wait_for_element.timeout);
     }
     // Add more step types as needed
   }
