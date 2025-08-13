@@ -193,10 +193,18 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
         console.log(chalk.green(`✓ Text verified:`) + ` "${step.expect.text}"`);
       }
       
-      if (step.wait_for_element) {
-        const timeout = step.wait_for_element.timeout || browser.browser.options.timeout;
-        await browser.waitForSelector(step.wait_for_element.selector, timeout);
-        console.log(chalk.green(`✓ Element ready:`) + ` ${step.wait_for_element.selector}`);
+      if (step.wait) {
+        if (step.wait.text) {
+          const timeout = step.wait.timeout || browser.browser.options.timeout;
+          await browser.waitForText(step.wait.text, timeout);
+          console.log(chalk.green(`✓ Text found:`) + ` "${step.wait.text}"`);
+        } else if (step.wait.selector) {
+          const timeout = step.wait.timeout || browser.browser.options.timeout;
+          await browser.waitForSelector(step.wait.selector, timeout);
+          console.log(chalk.green(`✓ Element ready:`) + ` ${step.wait.selector}`);
+        } else {
+          throw new Error('wait action must specify either "text" or "selector"');
+        }
       }
       
       if (step.snapshot) {
@@ -230,11 +238,7 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
         await browser.gotoWithAuth(url, authToken, tokenHeader);
       }
 
-      // 4. wait_for_text - Waits for text to appear
-      if (step.wait_for_text) {
-        const { text, timeout } = step.wait_for_text;
-        await browser.waitForText(text, timeout || browser.browser.options.timeout);
-      }
+
 
       // 5. click_if_visible - Clicks only if visible
       if (step.click_if_visible) {

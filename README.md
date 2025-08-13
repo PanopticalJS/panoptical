@@ -47,8 +47,7 @@ Panoptical includes **powerful automation methods** that transform it from a bas
 - **`login`** - Smart authentication with automatic verification
 - **`logout`** - Clean session management with verification
 - **`goto_with_auth`** - Navigate to protected pages with auth tokens
-- **`wait_for_element`** - Wait for an element to appear with configurable timeout
-- **`wait_for_text`** - Wait for specific text to appear anywhere
+- **`wait`** - Unified wait action for elements or text with configurable timeout
 - **`click_if_visible`** - Smart clicking that won't fail
 
 ### **UI Interaction Helpers**
@@ -116,7 +115,7 @@ test: "Simple Login Test"
 description: "Test user authentication flow"
 steps:
   - goto: "https://example.com/login"
-  - wait_for_element:
+  - wait:
       selector: "#username"
   - type:
       selector: "#username"
@@ -144,7 +143,7 @@ steps:
       successIndicator: '.dashboard'
   
   # Wait for welcome message
-  - wait_for_text:
+  - wait:
       text: 'Welcome back'
       timeout: 5000
   
@@ -243,9 +242,14 @@ panoptical run tests/example.yaml --headed
     selector: "#output"
     text: "Success"
 
-# Waiting
-- wait_for_element:
-    selector: "#element"
+# Unified Waiting
+- wait:
+    selector: "#element"  # Wait for element to appear
+- wait:
+    text: "Loading complete"  # Wait for text to appear
+- wait:
+    selector: "#slow-element"
+    timeout: 60000  # Custom timeout
 
 # Screenshots
 - snapshot: "test-result"
@@ -406,12 +410,12 @@ test: "E-commerce Checkout Flow"
 description: "Complete purchase process testing"
 setup:
   - goto: "https://shop.example.com"
-  - wait_for_element:
+  - wait:
       selector: ".product-grid"
 steps:
   # Product selection
   - click: ".product-card:first-child"
-  - wait_for_element:
+  - wait:
       selector: "#add-to-cart"
   - click: "#add-to-cart"
   
@@ -501,7 +505,7 @@ jobs:
 2. **Element not found**
    ```yaml
    # Increase timeout
-   - wait_for_element:
+   - wait:
        selector: "#element"
        timeout: 40000
    ```

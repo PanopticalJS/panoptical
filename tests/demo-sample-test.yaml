@@ -3,7 +3,7 @@ description: Comprehensive demonstration of Panoptical's testing framework capab
 setup:
   - goto: 'https://panoptical.dev/testing/test-page.html'
 steps:
-  - wait_for_element:
+  - wait:
       selector: 'body'
   - click: '#demo-button'
   - expect:
