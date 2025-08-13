@@ -1,0 +1,23 @@
+test: Panoptical Showcase Test
+description: Comprehensive demonstration of Panoptical's testing framework capabilities with real browser automation
+setup:
+  - goto: 'https://panoptical.dev/testing/test-page.html'
+steps:
+  - wait:
+      selector: 'body'
+      timeout: 2000
+  - click: '#demo-button'
+  - expect:
+      selector: '#demo-output'
+      text: 'Button clicked!'
+  - type:
+      selector: '#demo-input'
+      text: 'Hello Panoptical!'
+  - click: '#demo-button'
+  - expect:
+      selector: '#demo-output'
+      text: 'Hello Panoptical!2'
+  - pause: 1000
+  - snapshot: 'demo-success'
+teardown:
+  - click: '#reset-button'

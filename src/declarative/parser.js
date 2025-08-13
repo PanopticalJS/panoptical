@@ -1,0 +1,217 @@
+import chalk from 'chalk';
+import fs from 'fs';
+import path from 'path';
+import YAML from 'yaml';
+import { PanopticalCompatibility } from '../browser/compatibility.js';
+import { ScreenshotManager } from '../utils/screenshots.js';
+
+/**
+ * Convert milliseconds to human-readable format
+ * @param {number} ms - Milliseconds
+ * @returns {string} Formatted time string
+ */
+function formatDuration(ms) {
+  if (ms < 1000) {
+    return `${ms}ms`;
+  }
+  
+  const seconds = Math.floor(ms / 1000);
+  const remainingMs = ms % 1000;
+  
+  if (seconds < 60) {
+    return remainingMs > 0 ? `${seconds}s ${remainingMs}ms` : `${seconds}s`;
+  }
+  
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  
+  if (remainingSeconds === 0) {
+    return `${minutes}m`;
+  }
+  
+  return `${minutes}m ${remainingSeconds}s`;
+}
+
+export async function runDeclarativeTest(filePath, options = {}) {
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Test file not found: ${filePath}`);
+  }
+  
+  const raw = fs.readFileSync(filePath, 'utf8');
+  let data;
+  
+  try {
+    data = YAML.parse(raw);
+  } catch (e) {
+    throw new Error(`Invalid YAML in ${filePath}: ${e}`);
+  }
+  
+  if (!data.test || !data.steps || !Array.isArray(data.steps)) {
+    throw new Error(`Invalid test structure in ${filePath}. Must have 'test' and 'steps' fields.`);
+  }
+  
+  console.log(`Running declarative test: ${data.test}`);
+  if (data.description) {
+    console.log(`Description: ${data.description}`);
+  }
+  
+  // Initialize screenshot manager
+  const screenshotManager = new ScreenshotManager();
+  
+  // Use the new Panoptical browser engine
+  const browser = new PanopticalCompatibility(options);
+  const startTime = Date.now();
+  
+  try {
+    await browser.launch();
+    await browser.newPage();
+    
+    // Run setup steps if defined
+    if (data.setup && Array.isArray(data.setup)) {
+      console.log('Running setup steps...');
+      await runSteps(browser, data.setup, 'setup', screenshotManager, data.test);
+    }
+    
+    // Run main test steps
+    console.log('Running test steps...');
+    await runSteps(browser, data.steps, 'test', screenshotManager, data.test);
+    
+    // Run teardown steps if defined
+    if (data.teardown && Array.isArray(data.teardown)) {
+      console.log('Running teardown steps...');
+      await runSteps(browser, data.teardown, 'teardown', screenshotManager, data.test);
+    }
+    
+    const duration = Date.now() - startTime;
+    console.log(chalk.green(`✓ Test completed in ${formatDuration(duration)}`));
+    
+    // Clean up video on success
+    if (browser.cleanupVideoOnSuccess) {
+      await browser.cleanupVideoOnSuccess();
+    }
+    
+    // Close browser for successful tests
+    await browser.close();
+    
+    return { success: true, duration };
+    
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    console.error(chalk.red(`✗ Test failed after ${formatDuration(duration)}: ${error.message}`));
+    try {
+      const filename = path.basename(filePath, '.yaml');
+      const failureFilename = screenshotManager.generateTestFailureFilename(filename);
+      const failurePath = screenshotManager.getScreenshotPath(failureFilename);
+      await browser.screenshot(failurePath);
+      console.log(chalk.yellow(`Failure screenshot saved: ${failureFilename}`));
+    } catch (screenshotError) {
+      console.error('Failed to take failure screenshot:', screenshotError.message);
+    }
+
+    try {
+      if (browser.saveVideoOnFailure) {
+        const filename = path.basename(filePath, '.yaml');
+        const videoPath = await browser.saveVideoOnFailure(filename);
+        if (videoPath) {
+        } else if (browser.options && browser.options.video && browser.options.video.enabled) {
+          console.log(chalk.yellow('Video saving returned null'));
+        }
+      } else {
+        console.log(chalk.red('saveVideoOnFailure method NOT found on browser object'));
+      }
+    } catch (videoError) {
+      console.error('Failed to save failure video:', videoError.message);
+      console.error('Video error stack:', videoError.stack);
+    }
+
+    throw error;
+  } finally {
+    try {
+      if (browser.page && !browser.page.isClosed()) {
+        await browser.close();
+      }
+    } catch (closeError) {
+    }
+  }
+}
+
+async function runSteps(browser, steps, stepType, screenshotManager, testName) {
+  for (let i = 0; i < steps.length; i++) {
+    const step = steps[i];
+    
+    try {
+      if (step.goto) {
+        // Retry navigation up to 3 times
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        while (retryCount < maxRetries) {
+          try {
+            await browser.goto(step.goto);
+            break; // Success, exit retry loop
+          } catch (error) {
+            retryCount++;
+            if (retryCount >= maxRetries) {
+              throw error; // Give up after max retries
+            }
+            console.log(`    Retry ${retryCount}/${maxRetries}...`);
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retry
+          }
+        }
+        
+        // Use a more robust wait strategy
+        try {
+          await browser.waitForLoadState();
+        } catch (e) {
+          // Fallback: wait for body element
+          await browser.waitForSelector('body', 10000);
+        }
+        
+        // Navigation completed successfully
+        console.log(chalk.green(`✓ Navigated to: ${step.goto}`));
+      }
+      
+      if (step.click) {
+        await browser.waitForSelector(step.click);
+        await browser.click(step.click);
+        console.log(chalk.green(`✓ Clicked ${step.click}`));
+      }
+      
+      if (step.type) {
+        await browser.waitForSelector(step.type.selector);
+        await browser.type(step.type.selector, step.type.text);
+        console.log(chalk.green(`✓ Typed "${step.type.text}" into ${step.type.selector}`));
+      }
+      
+      if (step.expect) {
+        await browser.waitForSelector(step.expect.selector);
+        const text = await browser.getText(step.expect.selector);
+        if (!text.includes(step.expect.text)) {
+          throw new Error(`Expected text "${step.expect.text}" not found. Got: "${text}"`);
+        }
+        console.log(chalk.green(`✓ Text verified: "${step.expect.text}"`));
+      }
+      
+      if (step.wait) {
+        const timeout = step.wait.timeout || 10000; // Increased default timeout
+        await browser.waitForSelector(step.wait.selector, timeout);
+        console.log(chalk.green(`✓ Element ready: ${step.wait.selector}`));
+      }
+      
+      if (step.snapshot) {
+        const filename = screenshotManager.generateTestSuccessFilename(testName, step.snapshot);
+        const screenshotPath = screenshotManager.getScreenshotPath(filename);
+        await browser.screenshot(screenshotPath);
+        console.log(chalk.green(`✓ Screenshot taken: ${filename}`));
+      }
+      
+      if (step.pause) {
+        await new Promise(resolve => setTimeout(resolve, step.pause));
+        console.log(chalk.green(`✓ Paused for ${step.pause}ms`));
+      }
+      
+    } catch (error) {
+      throw new Error(`Step failed: ${error}`);
+    }
+  }
+}
