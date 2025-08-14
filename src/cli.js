@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import fs from 'fs';
 import { config } from './config.js';
 import { analyzeFlakes } from './flakiness/analyzer.js';
-import { runTests } from './runner/runner.js';
+import { runTests } from './core/runner.js';
 
 const args = process.argv.slice(2);
 const cmd = args[0];
