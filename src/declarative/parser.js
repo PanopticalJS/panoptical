@@ -169,14 +169,14 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
         }
         
         // Navigation completed successfully
-        console.log(chalk.green(`✓ Navigated to:`) + ` ${step.goto}`);
+        console.log(chalk.green(`✓ Navigated to:`) + chalk.bold.green(` ${step.goto}`));
       }
       
       if (step.click) {
         if (typeof step.click === 'string') {
           await browser.waitForSelector(step.click);
           await browser.click(step.click);
-          console.log(chalk.green(`✓ Clicked`) + ` ${step.click}`);
+          console.log(chalk.green(`✓ Clicked`) + chalk.bold.green(` ${step.click}`));
         } else if (step.click.text) {
           const timeout = step.click.timeout || browser.browser.options.timeout;
           const page = browser.getPage();
@@ -189,12 +189,12 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
             { timeout }
           );
           await page.click(`text="${step.click.text}"`);
-          console.log(chalk.green(`✓ Clicked`) + ` "${step.click.text}"`);
+          console.log(chalk.green(`✓ Clicked`) + chalk.bold.green(` "${step.click.text}"`));
         } else if (step.click.selector) {
           const timeout = step.click.timeout || browser.browser.options.timeout;
           await browser.waitForSelector(step.click.selector, timeout);
           await browser.click(step.click.selector);
-          console.log(chalk.green(`✓ Clicked`) + ` ${step.click.selector}`);
+          console.log(chalk.green(`✓ Clicked`) + chalk.bold.green(` ${step.click.selector}`));
         } else {
           throw new Error('click action must specify either a string selector, text, or selector object');
         }
@@ -203,7 +203,7 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
       if (step.type) {
         await browser.waitForSelector(step.type.selector);
         await browser.type(step.type.selector, step.type.text);
-        console.log(chalk.green(`✓ Typed`) + ` "${step.type.text}" ` + chalk.green(`into`) + ` ${step.type.selector}`);
+        console.log(chalk.green(`✓ Typed`) + chalk.bold.green(` "${step.type.text}"`) + chalk.green(` into `) + chalk.bold.green(`${step.type.selector}`));
       }
       
       if (step.selectOption) {
@@ -220,7 +220,6 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
       
       if (step.randomFill) {
         await browser.randomFill(step.randomFill);
-        console.log(chalk.green(`✓ Form filled with random data`));
       }
       
       if (step.expect) {
@@ -229,7 +228,7 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
         if (!text.includes(step.expect.text)) {
           throw new Error(`Expected text "${step.expect.text}" not found. Got: "${text}"`);
         }
-        console.log(chalk.green(`✓ Text verified:`) + ` "${step.expect.text}"`);
+        console.log(chalk.green(`✓ Text verified:`) + chalk.bold.green(` "${step.expect.text}"`));
       }
       
       if (step.wait) {
@@ -245,11 +244,11 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
             step.wait.text,
             { timeout }
           );
-          console.log(chalk.green(`✓ Text found:`) + ` "${step.wait.text}"`);
+          console.log(chalk.green(`✓ Text found:`) + chalk.bold.green(` "${step.wait.text}"`));
         } else if (step.wait.selector) {
           const timeout = step.wait.timeout || browser.browser.options.timeout;
           await browser.waitForSelector(step.wait.selector, timeout);
-          console.log(chalk.green(`✓ Element ready:`) + ` ${step.wait.selector}`);
+          console.log(chalk.green(`✓ Element ready:`) + chalk.bold.green(` ${step.wait.selector}`));
         } else {
           throw new Error('wait action must specify either "text" or "selector"');
         }
@@ -259,12 +258,12 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
         const filename = screenshotManager.generateTestSuccessFilename(testName, step.snapshot);
         const screenshotPath = screenshotManager.getScreenshotPath(filename);
         await browser.screenshot(screenshotPath);
-        console.log(chalk.green(`✓ Screenshot taken:`) + ` ${filename}`);
+        console.log(chalk.green(`✓ Screenshot taken:`) + chalk.bold.green(` ${filename}`));
       }
       
       if (step.pause) {
         await new Promise(resolve => setTimeout(resolve, step.pause));
-        console.log(chalk.green(`✓ Paused for`) + ` ${step.pause}ms`);
+        console.log(chalk.green(`✓ Paused for`) + chalk.bold.green(` ${step.pause}ms`));
       }
 
       // ===== New Action Helper Steps =====
