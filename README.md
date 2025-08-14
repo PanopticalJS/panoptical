@@ -131,6 +131,29 @@ steps:
       text: "Welcome"
 ```
 
+### **Beautiful Test Output**
+
+When you run your tests, Panoptical provides **beautiful, readable output** that makes debugging a delight:
+
+<div style="background-color: #1e1e1e; color: #4CAF50; padding: 20px; border-radius: 8px; font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; font-size: 14px; line-height: 1.5;">
+
+<div style="color: #4CAF50;">Running: Simple Login Test</div>
+<div style="color: #4CAF50;">Description: Test user authentication flow</div>
+<br>
+<div style="color: #4CAF50;">✓</div> <div style="color: #4CAF50;">Navigated to </div><div style="color: #4CAF50; font-weight: bold;">https://example.com/login</div>
+<div style="color: #4CAF50;">✓</div> <div style="color: #4CAF50;">Element </div><div style="color: #4CAF50; font-weight: bold;">#username</div><div style="color: #4CAF50;"> is found</div>
+<div style="color: #4CAF50;">✓</div> <div style="color: #4CAF50;">Typed </div><div style="color: #4CAF50;">"testuser"</div><div style="color: #4CAF50;"> into </div><div style="color: #4CAF50; font-weight: bold;">#username</div>
+<div style="color: #4CAF50;">✓</div> <div style="color: #4CAF50;">Element </div><div style="color: #4CAF50; font-weight: bold;">#password</div><div style="color: #4CAF50;"> is found</div>
+<div style="color: #4CAF50;">✓</div> <div style="color: #4CAF50;">Typed </div><div style="color: #4CAF50;">"password123"</div><div style="color: #4CAF50;"> into </div><div style="color: #4CAF50; font-weight: bold;">#password</div>
+<div style="color: #4CAF50;">✓</div> <div style="color: #4CAF50;">Clicked on text </div><div style="color: #4CAF50; font-weight: bold;">Log In</div>
+<div style="color: #4CAF50;">✓</div> <div style="color: #4CAF50;">Element </div><div style="color: #4CAF50; font-weight: bold;">#dashboard</div><div style="color: #4CAF50;"> is found</div>
+<div style="color: #4CAF50;">✓</div> <div style="color: #4CAF50;">Text </div><div style="color: #4CAF50; font-weight: bold;">"Welcome to Dashboard"</div><div style="color: #4CAF50;"> is found</div>
+<div style="color: #4CAF50;">✓</div> <div style="color: #4CAF50;">Test completed in </div><div style="color: #4CAF50; font-weight: bold;">2s 847ms</div>
+<br>
+<div style="color: #4CAF50;">Test Results Summary</div>
+
+</div>
+
 ### **Advanced Test Example**
 
 ```yaml
@@ -352,10 +375,9 @@ panoptical/
 │   │   └── compatibility.js # YAML interface compatibility layer
 │   ├── cli.js             # Command-line interface
 │   ├── config.js          # Configuration management
-│   ├── declarative/       # YAML test parser
+│   ├── core/             # Test execution engine & YAML parser
 │   ├── flakiness/         # Test reliability analysis
 │   ├── healing/           # Auto-healing selector system
-│   ├── runner/            # Test execution engine
 │   └── utils/             # Utility functions (screenshots)
 ├── tests/                 # Test files
 │   └── test-page.html     # Test HTML page

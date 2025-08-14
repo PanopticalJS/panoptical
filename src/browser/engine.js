@@ -73,12 +73,12 @@ export class PanopticalBrowser {
       }
 
       if (!this.options.headless) {
-        console.log(chalk.green('Browser running in headed mode'));
+        console.log('Browser running in headed mode');
       } else {
-        console.log(chalk.green('Browser running in headless mode'));
+        console.log('Browser running in headless mode');
       }
 
-      console.log(chalk.green(`${this.options.browser} browser launched successfully`));
+      console.log(`Browser ${this.options.browser} launched successfully`);
     } catch (error) {
       console.error(`Failed to launch browser: ${error.message}`);
       throw error;
@@ -116,7 +116,7 @@ export class PanopticalBrowser {
       }
     }
     
-    console.log(chalk.green('New page created'));
+    console.log('New page created');
     return this.page;
   }
 

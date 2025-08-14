@@ -1,8 +1,8 @@
 import chalk from 'chalk';
 import fs from 'fs';
 import path from 'path';
-import { runDeclarativeTest } from '../declarative/parser.js';
 import { logRun } from '../flakiness/analyzer.js';
+import { runDeclarativeTest } from './parser.js';
 
 /**
  * Convert milliseconds to human-readable format
