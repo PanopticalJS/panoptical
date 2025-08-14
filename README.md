@@ -473,56 +473,6 @@ panoptical run tests --browser firefox
 panoptical run tests --browser webkit
 ```
 
-### **CI/CD Integration**
-
-```yaml
-# GitHub Actions example
-name: Panoptical Tests
-on: [push, pull_request]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-      - run: pnpm install
-      - run: pnpm exec playwright install
-      - run: panoptical run tests
-```
-
-## **Debugging & Troubleshooting**
-
-### **Common Issues**
-
-1. **Browser not launching**
-   ```bash
-   # Install browser binaries
-   pnpm exec playwright install
-   ```
-
-2. **Element not found**
-   ```yaml
-   # Increase timeout
-   - wait:
-       selector: "#element"
-       timeout: 40000
-   ```
-
-3. **Test flakiness**
-   ```bash
-   # Analyze test reliability
-   panoptical analyze-flakes
-   ```
-
-### **Debug Features**
-
-- **Headed mode**: See browser actions in real-time
-- **Failure screenshots**: Automatic capture on failures
-- **Auto-healing feedback**: See which selectors are being healed
-- **Human-readable timing**: Test durations in minutes/seconds format
-
 ## **Available Commands**
 
 ```bash
@@ -560,8 +510,7 @@ We welcome contributions! Here's how to get started:
 1. **Fork the repository**
 2. **Create a feature branch**
 3. **Make your changes**
-4. **Add tests**
-5. **Submit a pull request**
+4. **Submit a pull request**
 
 ### **Development Setup**
 
