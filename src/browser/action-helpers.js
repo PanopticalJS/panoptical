@@ -639,8 +639,6 @@ export class ActionHelpers {
    * random_fill - Generates random test data (names, emails, addresses) and fills forms automatically
    */
   async randomFill(formData) {
-    console.log(chalk.blue(`Filling form with random data...`));
-    
     try {
       for (const [selector, fieldType] of Object.entries(formData)) {
         let randomValue = '';
@@ -678,11 +676,7 @@ export class ActionHelpers {
         // Fill the field
         await this.browser.waitForSelector(selector);
         await this.browser.type(selector, randomValue);
-        
-        console.log(chalk.blue(`Filled ${selector}: ${randomValue}`));
       }
-      
-      console.log(chalk.green(`✓ Form filled with random data`));
       return true;
     } catch (error) {
       console.error(chalk.red(`✗ Random fill failed: ${error.message}`));
