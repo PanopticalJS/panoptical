@@ -1,4 +1,4 @@
-# Panoptical — Playwright Made Simple, Testing Made Delightful
+# Playwright Made Simple, Testing Made Delightful
 
 **A modern, unified browser automation tool that makes Playwright easy to use with simple YAML syntax.**
 
