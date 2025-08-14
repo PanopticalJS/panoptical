@@ -6,6 +6,8 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![Playwright](https://img.shields.io/badge/Playwright-1.54+-blue.svg)](https://playwright.dev/)
 
+![Banner](https://panoptical.dev/testing/ghbanner.jpg)
+
 ## **What is Panoptical?**
 
 **Panoptical is a testing tool that makes Playwright easy to use.** Instead of writing complex JavaScript code, you write simple YAML files that Panoptical converts into Playwright commands.
