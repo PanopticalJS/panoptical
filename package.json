@@ -1,12 +1,25 @@
 {
   "name": "panoptical",
-  "version": "0.2.0",
+  "version": "0.10.0",
   "description": "A modern testing tool that makes Playwright easy to use with simple YAML syntax",
   "type": "module",
   "main": "src/cli.js",
   "bin": {
     "panoptical": "./src/cli.js"
   },
+  "files": [
+    "src/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PanopticalJS/panoptical.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PanopticalJS/panoptical/issues"
+  },
+  "homepage": "https://github.com/PanopticalJS/panoptical#readme",
   "keywords": [
     "testing",
     "automation",
@@ -14,7 +27,15 @@
     "yaml",
     "browser",
     "e2e",
-    "selenium-alternative"
+    "selenium-alternative",
+    "declarative-testing",
+    "browser-automation",
+    "test-automation",
+    "web-testing",
+    "ui-testing",
+    "acceptance-testing",
+    "bdd",
+    "cucumber-alternative"
   ],
   "author": "Veljko Vujanovic",
   "license": "MIT",
@@ -30,7 +51,10 @@
     "screenshots:clean-all": "node src/cli.js screenshots force-clean",
     "analyze": "node src/cli.js analyze-flakes",
     "config": "node src/cli.js config show",
-    "help": "node src/cli.js help"
+    "help": "node src/cli.js help",
+    "prepublishOnly": "npm test",
+    "version": "git add -A src",
+    "postversion": "git push && git push --tags"
   },
   "dependencies": {
     "chalk": "^5.5.0",
@@ -38,6 +62,10 @@
   },
   "peerDependencies": {
     "playwright": "^1.54.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
   "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
 }

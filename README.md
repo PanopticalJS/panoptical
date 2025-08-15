@@ -95,7 +95,7 @@ Panoptical includes **powerful automation methods** that transform it from a bas
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/PanopticalJS/panoptical.git
 cd panoptical
 
 # Install dependencies
