@@ -14,21 +14,22 @@ function formatDuration(ms) {
     return `${ms}ms`;
   }
   
-  const seconds = Math.floor(ms / 1000);
-  const remainingMs = ms % 1000;
+  const seconds = ms / 1000;
   
   if (seconds < 60) {
-    return remainingMs > 0 ? `${seconds}s ${remainingMs}ms` : `${seconds}s`;
+    // Show seconds with 1 decimal place for precision
+    return `${seconds.toFixed(1)}s`;
   }
   
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   
-  if (remainingSeconds === 0) {
+  if (remainingSeconds < 1) {
     return `${minutes}m`;
   }
   
-  return `${minutes}m ${remainingSeconds}s`;
+  // Show minutes and seconds with 1 decimal place
+  return `${minutes}m ${remainingSeconds.toFixed(1)}s`;
 }
 
 export async function runTests(dir, options = {}) {
@@ -81,12 +82,22 @@ export async function runTests(dir, options = {}) {
       
     } catch (err) {
       const duration = Date.now() - testStartTime;
-              const errorMessage = err instanceof Error ? err.message : String(err);
-        await logRun(fileName, 'fail', duration, errorMessage);
-        console.error(chalk.red(`Test: ${fileName} failed`));
-        console.error(chalk.red(`${errorMessage}`));
-        console.error(chalk.grey(`Duration: ${formatDuration(duration)}`));
-        failed++;
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      await logRun(fileName, 'fail', duration, errorMessage);
+      
+      console.error(chalk.red(`Test: ${fileName} failed`));
+      console.error(chalk.red(`${errorMessage}`));
+      
+      // Display screenshot and video info if available
+      if (err.screenshotInfo) {
+        console.error(chalk.yellow(err.screenshotInfo));
+      }
+      if (err.videoInfo) {
+        console.error(chalk.yellow(err.videoInfo));
+      }
+      
+      console.error(chalk.grey(`Duration: ${formatDuration(duration)}`));
+      failed++;
     }
     
     console.log(''); // Empty line for readability

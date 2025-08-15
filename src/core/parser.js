@@ -15,21 +15,22 @@ function formatDuration(ms) {
     return `${ms}ms`;
   }
   
-  const seconds = Math.floor(ms / 1000);
-  const remainingMs = ms % 1000;
+  const seconds = ms / 1000;
   
   if (seconds < 60) {
-    return remainingMs > 0 ? `${seconds}s ${remainingMs}ms` : `${seconds}s`;
+    // Show seconds with 1 decimal place for precision
+    return `${seconds.toFixed(1)}s`;
   }
   
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   
-  if (remainingSeconds === 0) {
+  if (remainingSeconds < 1) {
     return `${minutes}m`;
   }
   
-  return `${minutes}m ${remainingSeconds}s`;
+  // Show minutes and seconds with 1 decimal place
+  return `${minutes}m ${remainingSeconds.toFixed(1)}s`;
 }
 
 export async function runDeclarativeTest(filePath, options = {}) {
@@ -97,13 +98,16 @@ export async function runDeclarativeTest(filePath, options = {}) {
     
   } catch (error) {
     const duration = Date.now() - startTime;
+    
+    let screenshotInfo = '';
+    let videoInfo = '';
 
     try {
       const filename = path.basename(filePath, '.yaml');
       const failureFilename = screenshotManager.generateTestFailureFilename(filename);
       const failurePath = screenshotManager.getScreenshotPath(failureFilename);
       await browser.screenshot(failurePath);
-      console.log(chalk.yellow(`Screenshot: ${failureFilename}`));
+      screenshotInfo = `Screenshot: ${failureFilename}`;
     } catch (screenshotError) {
       console.error('Failed to take failure screenshot:', screenshotError.message);
     }
@@ -113,18 +117,25 @@ export async function runDeclarativeTest(filePath, options = {}) {
         const filename = path.basename(filePath, '.yaml');
         const videoPath = await browser.saveVideoOnFailure(filename);
         if (videoPath) {
+          videoInfo = `Video: ${path.basename(videoPath)}`;
         } else if (browser.options && browser.options.video && browser.options.video.enabled) {
-          console.log(chalk.yellow('Video saving returned null'));
+          videoInfo = 'Video: Failed to save';
         }
       } else {
-        console.log(chalk.red('saveVideoOnFailure method NOT found on browser object'));
+        videoInfo = 'Video: Not available';
       }
     } catch (videoError) {
       console.error('Failed to save failure video:', videoError.message);
-      console.error('Video error stack:', videoError.stack);
+      videoInfo = 'Video: Failed to save';
     }
 
-    throw error;
+    // Create enhanced error with screenshot and video info
+    const enhancedError = new Error(error.message);
+    enhancedError.screenshotInfo = screenshotInfo;
+    enhancedError.videoInfo = videoInfo;
+    enhancedError.originalError = error;
+    
+    throw enhancedError;
   } finally {
     try {
       if (browser.page && !browser.page.isClosed()) {
@@ -438,7 +449,7 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
       const stepNumber = i + 1;
       const stepAction = Object.keys(step)[0] || 'unknown';
       const stepDetails = JSON.stringify(step[stepAction] || step);
-      throw new Error(`Step ${stepNumber} (${stepAction}): ${stepDetails}\nReason: ${error.message || error}`);
+      throw new Error(`Step ${stepNumber} (${stepAction}): ${stepDetails}\nFailure: ${error.message || error}`);
     }
   }
 }
