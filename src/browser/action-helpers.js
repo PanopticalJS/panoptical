@@ -26,9 +26,6 @@ export class ActionHelpers {
    */
   async login(credentials) {
     const { username, password, usernameSelector, passwordSelector, submitSelector, successIndicator } = credentials;
-    
-    console.log(chalk.blue(`Logging in as ${username}...`));
-    
     try {
       // Wait for login form to be ready
       await this.browser.waitForSelector(usernameSelector);
@@ -72,8 +69,6 @@ export class ActionHelpers {
    * logout - Logs out and verifies the user is redirected to the login screen
    */
   async logout(logoutSelector, loginPageIndicator) {
-    console.log(chalk.blue(`Logging out...`));
-    
     try {
       // Click logout button/link
       await this.browser.waitForSelector(logoutSelector);
@@ -101,8 +96,6 @@ export class ActionHelpers {
    * goto_with_auth - Navigates to a page but attaches an auth token/session automatically
    */
   async gotoWithAuth(url, authToken, tokenHeader = 'Authorization') {
-    console.log(chalk.blue(`Navigating to ${url} with authentication...`));
-    
     try {
       // Set auth header before navigation
       const page = this.getPage();
@@ -148,8 +141,6 @@ export class ActionHelpers {
    * select_from_dropdown - Chooses an option by text, not by value (more human-friendly)
    */
   async selectFromDropdown(selector, optionText, options = {}) {
-    console.log(chalk.blue(`Selecting "${optionText}" from dropdown...`));
-    
     try {
       // Wait for dropdown to be ready
       await this.browser.waitForSelector(selector);
@@ -174,8 +165,6 @@ export class ActionHelpers {
    * hover_and_click - Hover over a menu, then click a submenu item
    */
   async hoverAndClick(hoverSelector, clickSelector, options = {}) {
-    console.log(chalk.blue(`Hovering over ${hoverSelector} and clicking ${clickSelector}...`));
-    
     try {
       // Hover over the main element
       const page = this.getPage();
@@ -199,8 +188,6 @@ export class ActionHelpers {
    * upload_file - Attaches a file to a file input and verifies it's uploaded
    */
   async uploadFile(fileInputSelector, filePath, successIndicator) {
-    console.log(chalk.blue(`Uploading file: ${filePath}...`));
-    
     try {
       // Wait for file input to be ready
       await this.browser.waitForSelector(fileInputSelector);
@@ -230,8 +217,6 @@ export class ActionHelpers {
    * download_and_verify - Downloads a file, checks its size or contents
    */
   async downloadAndVerify(downloadSelector, expectedSize, expectedContent = null) {
-    console.log(chalk.blue(`Downloading file...`));
-    
     try {
       // Set up download listener
       const downloadPromise = this.browser.waitForEvent('download');
@@ -284,8 +269,6 @@ export class ActionHelpers {
    * take_screenshot - Saves a screenshot with a custom name for debugging
    */
   async takeScreenshot(name, options = {}) {
-    console.log(chalk.blue(`Taking screenshot: ${name}...`));
-    
     try {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const filename = `${name}_${timestamp}.png`;
@@ -312,8 +295,6 @@ export class ActionHelpers {
    * verify_table_row - Asserts that a table contains a row with specific cell values
    */
   async verifyTableRow(tableSelector, expectedRow) {
-    console.log(chalk.blue(`Verifying table row: ${JSON.stringify(expectedRow)}...`));
-    
     try {
       const tableData = await this.browser.evaluate((selector, expected) => {
         const table = document.querySelector(selector);
@@ -356,8 +337,6 @@ export class ActionHelpers {
    * assert_element_count - Checks how many elements match a selector
    */
   async assertElementCount(selector, expectedCount, operator = '==') {
-    console.log(chalk.blue(`Asserting element count: ${selector} ${operator} ${expectedCount}...`));
-    
     try {
       const actualCount = await this.browser.locator(selector).count();
       
@@ -398,8 +377,6 @@ export class ActionHelpers {
    * check_api_response - Sends an HTTP request and validates the response (API + UI combo testing)
    */
   async checkApiResponse(url, method = 'GET', headers = {}, body = null, expectedStatus = 200, expectedContent = null) {
-    console.log(chalk.blue(`Checking API response: ${method} ${url}...`));
-    
     try {
       const response = await this.browser.request.fetch(url, {
         method,
@@ -432,8 +409,6 @@ export class ActionHelpers {
    * assert_element_not_present - Ensures an element does not exist (good for post-action checks)
    */
   async assertElementNotPresent(selector, timeout = 30000) {
-    console.log(chalk.blue(`Asserting element not present: ${selector}...`));
-    
     try {
       // Wait a bit to see if element appears
       await new Promise(resolve => setTimeout(resolve, timeout));
@@ -456,8 +431,6 @@ export class ActionHelpers {
    * measure_performance - Records page load time or specific action performance
    */
   async measurePerformance(action, options = {}) {
-    console.log(chalk.blue(`Measuring performance: ${action}...`));
-    
     try {
       const startTime = performance.now();
       
@@ -491,11 +464,8 @@ export class ActionHelpers {
    * repeat - Loops a set of steps multiple times
    */
   async repeat(steps, count, options = {}) {
-    console.log(chalk.blue(`Repeating ${count} times...`));
-    
     try {
       for (let i = 0; i < count; i++) {
-        console.log(chalk.blue(`  Iteration ${i + 1}/${count}`));
         
         for (const step of steps) {
           // Execute each step in the repeat block
@@ -520,8 +490,6 @@ export class ActionHelpers {
    * run_if - Runs steps only if a condition is met (e.g., element exists)
    */
   async runIf(condition, steps, options = {}) {
-    console.log(chalk.blue(`Checking condition: ${condition}...`));
-    
     try {
       let shouldRun = false;
       
@@ -539,7 +507,7 @@ export class ActionHelpers {
       }
       
       if (shouldRun) {
-        console.log(chalk.blue(`Condition met, running ${steps.length} steps...`));
+
         
         for (const step of steps) {
           await this.executeStep(step);
@@ -561,8 +529,6 @@ export class ActionHelpers {
    * store_text - Saves text from an element into a variable for later steps
    */
   async storeText(selector, variableName) {
-    console.log(chalk.blue(`Storing text from ${selector} into variable: ${variableName}...`));
-    
     try {
       const text = await this.browser.getText(selector);
       
@@ -581,8 +547,6 @@ export class ActionHelpers {
    * compare_values - Compares stored variables or UI values and passes/fails based on equality
    */
   async compareValues(value1, value2, operator = '==', options = {}) {
-    console.log(chalk.blue(`Comparing values: ${value1} ${operator} ${value2}...`));
-    
     try {
       // Resolve variables if they start with $
       const resolveValue = (val) => {
@@ -690,8 +654,6 @@ export class ActionHelpers {
    * resize_viewport - Resizes the viewport to test responsive design
    */
   async resizeViewport(width, height, device = null) {
-    console.log(chalk.blue(`Resizing viewport to ${width}x${height}...`));
-    
     try {
       const page = this.getPage();
       
@@ -719,8 +681,6 @@ export class ActionHelpers {
    * swipe - Performs swipe gesture (useful for mobile testing)
    */
   async swipe(selector, direction, distance = 200) {
-    console.log(chalk.blue(`Swiping ${direction} on ${selector}...`));
-    
     try {
       const page = this.getPage();
       
@@ -787,8 +747,6 @@ export class ActionHelpers {
    * tap - Performs tap gesture with configurable pressure
    */
   async tap(selector, pressure = 0.5) {
-    console.log(chalk.blue(`Tapping ${selector} with pressure ${pressure}...`));
-    
     try {
       const page = this.getPage();
       
@@ -825,8 +783,6 @@ export class ActionHelpers {
    * drag_and_drop - Drags an element and drops it on a target
    */
   async dragAndDrop(sourceSelector, targetSelector) {
-    console.log(chalk.blue(`Dragging ${sourceSelector} to ${targetSelector}...`));
-    
     try {
       const page = this.getPage();
       
@@ -874,8 +830,6 @@ export class ActionHelpers {
    * multi_select - Selects multiple options from a group of checkboxes or multi-select
    */
   async multiSelect(selector, options) {
-    console.log(chalk.blue(`Selecting multiple options: ${options.join(', ')}...`));
-    
     try {
       const page = this.getPage();
       
@@ -927,8 +881,6 @@ export class ActionHelpers {
    * press_keys - Presses keyboard keys or key combinations
    */
   async pressKeys(keys, targetSelector = null) {
-    console.log(chalk.blue(`Pressing keys: ${keys.join(' + ')}...`));
-    
     try {
       const page = this.getPage();
       
@@ -953,8 +905,6 @@ export class ActionHelpers {
    * scroll_to_element - Scrolls to make an element visible
    */
   async scrollToElement(selector, behavior = 'smooth') {
-    console.log(chalk.blue(`Scrolling to element: ${selector}...`));
-    
     try {
       const page = this.getPage();
       
@@ -976,8 +926,6 @@ export class ActionHelpers {
    * hover_element - Hovers over an element to trigger hover effects
    */
   async hoverElement(selector, duration = 1000) {
-    console.log(chalk.blue(`Hovering over element: ${selector}...`));
-    
     try {
       const page = this.getPage();
       
@@ -1148,7 +1096,7 @@ export class ActionHelpers {
    */
   clearVariables() {
     this.variables.clear();
-    console.log(chalk.blue(`Variables cleared`));
+
   }
 
   /**

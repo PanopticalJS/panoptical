@@ -83,7 +83,7 @@ export async function runDeclarativeTest(filePath, options = {}) {
     }
     
     const duration = Date.now() - startTime;
-    console.log(chalk.green(`✓ Test completed in ${formatDuration(duration)}`));
+    console.log(`Test completed in ${formatDuration(duration)}`);
     
     // Clean up video on success
     if (browser.cleanupVideoOnSuccess) {
@@ -97,13 +97,13 @@ export async function runDeclarativeTest(filePath, options = {}) {
     
   } catch (error) {
     const duration = Date.now() - startTime;
-    console.error(chalk.red(`✗ Test failed after ${formatDuration(duration)}: ${error.message}`));
+
     try {
       const filename = path.basename(filePath, '.yaml');
       const failureFilename = screenshotManager.generateTestFailureFilename(filename);
       const failurePath = screenshotManager.getScreenshotPath(failureFilename);
       await browser.screenshot(failurePath);
-      console.log(chalk.yellow(`Failure screenshot saved: ${failureFilename}`));
+      console.log(chalk.yellow(`Screenshot: ${failureFilename}`));
     } catch (screenshotError) {
       console.error('Failed to take failure screenshot:', screenshotError.message);
     }
@@ -435,7 +435,10 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
       }
       
     } catch (error) {
-      throw new Error(`Step failed: ${error}`);
+      const stepNumber = i + 1;
+      const stepAction = Object.keys(step)[0] || 'unknown';
+      const stepDetails = JSON.stringify(step[stepAction] || step);
+      throw new Error(`Step ${stepNumber} (${stepAction}): ${stepDetails}\nReason: ${error.message || error}`);
     }
   }
 }
