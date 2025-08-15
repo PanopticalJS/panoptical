@@ -560,6 +560,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Inspired by modern testing frameworks and developer experience
 - Community feedback and contributions
 
+[![npm version](https://badge.fury.io/js/panoptical.svg)](https://badge.fury.io/js/panoptical)
+[![npm downloads](https://img.shields.io/npm/dm/panoptical.svg)](https://www.npmjs.com/package/panoptical)
+
 ---
 
 **Panoptical** - Playwright made simple with YAML. 🚀
