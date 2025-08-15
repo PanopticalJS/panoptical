@@ -2,15 +2,32 @@
 import chalk from 'chalk';
 import fs from 'fs';
 import { config } from './config.js';
-import { analyzeFlakes } from './flakiness/analyzer.js';
 import { runTests } from './core/runner.js';
+import { analyzeFlakes } from './flakiness/analyzer.js';
+
+// Get version from package.json
+import { readFileSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packagePath = join(__dirname, '..', 'package.json');
+const packageJson = JSON.parse(readFileSync(packagePath, 'utf8'));
+const version = packageJson.version;
 
 const args = process.argv.slice(2);
 const cmd = args[0];
 
+// Check for version flags first
+if (args.includes('--version') || args.includes('-v')) {
+  console.log(version);
+  process.exit(0);
+}
+
 function showHelp() {
   console.log(chalk.blue('\nPanoptical — See Everything, Test Everything'));
-  console.log(chalk.cyan('A modern testing tool that makes Playwright easy to use with simple YAML syntax\n'));
+  console.log(chalk.cyan(`A modern testing tool that makes Playwright easy to use with simple YAML syntax (v${version})\n`));
   
   console.log(chalk.yellow('Usage:'));
   console.log(chalk.white('  panoptical <command> [options]\n'));
@@ -30,6 +47,7 @@ function showHelp() {
   console.log(chalk.white('  --timeout <ms>   Default timeout in milliseconds (default: 30000)'));
   console.log(chalk.white('  --retries <num>  Number of retry attempts (default: 3)'));
   console.log(chalk.white('  --video          Enable video recording (saves on failure only)'));
+  console.log(chalk.white('  --version, -v    Show version information'));
   console.log(chalk.white('  --help, -h       Show this help message\n'));
   
   console.log(chalk.yellow('Examples:'));

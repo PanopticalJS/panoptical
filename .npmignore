@@ -45,7 +45,6 @@ docs/
 !README.md
 
 # Package manager files
-package.json
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
