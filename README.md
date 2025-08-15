@@ -91,7 +91,19 @@ Panoptical includes **powerful automation methods** that transform it from a bas
 
 **Prerequisites:**
 - Node.js 18+ 
-- pnpm (recommended) or npm
+- npm or pnpm
+
+#### **Option 1: NPM Package (Recommended for users)**
+
+```bash
+# Install globally for CLI usage
+npm install -g panoptical
+
+# Or install locally in your project
+npm install --save-dev panoptical
+```
+
+#### **Option 2: Development Setup (for contributors)**
 
 ```bash
 # Clone the repository
@@ -106,6 +118,19 @@ pnpm exec playwright install
 
 # Make Panoptical globally available
 pnpm link --global
+```
+
+### **Quick Start**
+
+```bash
+# With npm package (global installation)
+panoptical run tests
+
+# With npm package (local installation)
+npx panoptical run tests
+
+# With development setup
+pnpm start
 ```
 
 ### **Your First Test**
