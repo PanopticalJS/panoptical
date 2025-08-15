@@ -76,15 +76,17 @@ export async function runTests(dir, options = {}) {
       
       const duration = Date.now() - testStartTime;
       await logRun(fileName, 'pass', duration);
-      console.log(chalk.green(`✓ ${fileName} passed (${formatDuration(duration)})`));
+      console.log(`${fileName} passed (${formatDuration(duration)})`);
       passed++;
       
     } catch (err) {
       const duration = Date.now() - testStartTime;
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      await logRun(fileName, 'fail', duration, errorMessage);
-      console.error(chalk.red(`✗ ${fileName} failed (${formatDuration(duration)}): ${errorMessage}`));
-      failed++;
+              const errorMessage = err instanceof Error ? err.message : String(err);
+        await logRun(fileName, 'fail', duration, errorMessage);
+        console.error(chalk.red(`Test: ${fileName} failed`));
+        console.error(chalk.red(`${errorMessage}`));
+        console.error(chalk.grey(`Duration: ${formatDuration(duration)}`));
+        failed++;
     }
     
     console.log(''); // Empty line for readability
