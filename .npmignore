@@ -8,13 +8,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Test files and artifacts
-tests/
+# Test artifacts
 artifacts/
-*.test.js
-*.spec.js
-test-*.yaml
-demo-*.yaml
 
 # Build artifacts
 dist/
