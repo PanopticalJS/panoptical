@@ -5,6 +5,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![Playwright](https://img.shields.io/badge/Playwright-1.54+-blue.svg)](https://playwright.dev/)
+[![npm version](https://badge.fury.io/js/panoptical.svg)](https://badge.fury.io/js/panoptical)
+[![npm downloads](https://img.shields.io/npm/dm/panoptical.svg)](https://www.npmjs.com/package/panoptical)
 
 ![Banner](https://panoptical.dev/testing/ghbanner.jpg)
 
@@ -559,9 +561,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Built on top of [Playwright](https://playwright.dev/) for robust browser automation
 - Inspired by modern testing frameworks and developer experience
 - Community feedback and contributions
-
-[![npm version](https://badge.fury.io/js/panoptical.svg)](https://badge.fury.io/js/panoptical)
-[![npm downloads](https://img.shields.io/npm/dm/panoptical.svg)](https://www.npmjs.com/package/panoptical)
 
 ---
 
