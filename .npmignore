@@ -1,0 +1,59 @@
+# Development files
+.git/
+.github/
+.vscode/
+.idea/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test files and artifacts
+tests/
+artifacts/
+*.test.js
+*.spec.js
+test-*.yaml
+demo-*.yaml
+
+# Build artifacts
+dist/
+build/
+coverage/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Documentation development
+docs/
+*.md
+!README.md
+
+# Package manager files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+azure-pipelines.yml
