@@ -1,6 +1,6 @@
 {
   "name": "panoptical",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "description": "A modern testing tool that makes Playwright easy to use with simple YAML syntax",
   "type": "module",
   "main": "src/cli.js",
