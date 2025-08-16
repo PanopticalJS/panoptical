@@ -51,7 +51,7 @@ export class ActionHelpers {
       // Wait for successful login
       if (successIndicator) {
         await this.browser.waitForSelector(successIndicator, 30000);
-        console.log(chalk.green(`✓ Successfully logged in as`) + ` ${username}`);
+        console.log(chalk.green(`✓ Successfully logged in as `) + chalk.bold.green(`${username}`));
       } else {
         // Wait for navigation or URL change
         await this.browser.waitForLoadState('networkidle');
@@ -106,7 +106,7 @@ export class ActionHelpers {
       // Navigate to the page
       await this.browser.goto(url);
       
-      console.log(chalk.green(`✓ Navigated to ${url} with authentication`));
+              console.log(chalk.green(`✓ Navigated to `) + chalk.bold.green(`${url}`) + chalk.green(` with authentication`));
       return true;
     } catch (error) {
       console.error(chalk.red(`✗ Navigation with auth failed: ${error.message}`));
@@ -123,7 +123,7 @@ export class ActionHelpers {
       
       if (isVisible) {
         await this.browser.click(selector, options);
-        console.log(chalk.green(`✓ Clicked visible element:`) + ` ${selector}`);
+        console.log(chalk.green(`✓ Clicked visible element: `) + chalk.bold.green(`${selector}`));
         return true;
       } else {
         console.log(chalk.yellow(`⚠ Element not visible, skipping click: ${selector}`));
@@ -142,19 +142,44 @@ export class ActionHelpers {
    */
   async selectFromDropdown(selector, optionText, options = {}) {
     try {
+      const timeout = options.timeout || 30000;
+      
       // Wait for dropdown to be ready
-      await this.browser.waitForSelector(selector);
+      await this.browser.waitForSelector(selector, timeout);
       
-      // Click to open dropdown
-      await this.browser.click(selector);
+      // Try multiple approaches for dropdown selection
+      const page = this.getPage();
       
-      // Wait for options to appear and select by text
-      const optionSelector = `text="${optionText}"`;
-      await this.browser.waitForSelector(optionSelector, 30000);
-      await this.browser.click(optionSelector);
-      
-      console.log(chalk.green(`✓ Selected "${optionText}" from dropdown`));
-      return true;
+      // Method 1: Try using Playwright's selectOption with label
+      try {
+        await page.selectOption(selector, { label: optionText });
+        console.log(chalk.green(`✓ Selected `) + chalk.bold.green(`"${optionText}"`) + chalk.green(` from dropdown using label`));
+        return true;
+      } catch (selectError) {
+        // Method 2: Try using selectOption with text
+        try {
+          await page.selectOption(selector, { text: optionText });
+          console.log(chalk.green(`✓ Selected `) + chalk.bold.green(`"${optionText}"`) + chalk.green(` from dropdown using text`));
+          return true;
+        } catch (textError) {
+          // Method 3: Manual click approach for custom dropdowns
+          // Click to open dropdown
+          await page.click(selector);
+          
+          // Wait a moment for dropdown to open
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Try to find and click the option by text content
+          const optionElement = await page.locator(`text="${optionText}"`).first();
+          if (await optionElement.isVisible()) {
+            await optionElement.click();
+            console.log(chalk.green(`✓ Selected `) + chalk.bold.green(`"${optionText}"`) + chalk.green(` from dropdown using manual click`));
+            return true;
+          } else {
+            throw new Error(`Option "${optionText}" not visible in dropdown`);
+          }
+        }
+      }
     } catch (error) {
       console.error(chalk.red(`✗ Dropdown selection failed: ${error.message}`));
       throw error;
@@ -176,7 +201,7 @@ export class ActionHelpers {
       // Click the submenu item
       await this.browser.click(clickSelector, options);
       
-      console.log(chalk.green(`✓ Hover and click completed`));
+              console.log(chalk.green(`✓ Hover and click completed successfully`));
       return true;
     } catch (error) {
       console.error(chalk.red(`✗ Hover and click failed: ${error.message}`));
@@ -187,7 +212,7 @@ export class ActionHelpers {
   /**
    * upload_file - Attaches a file to a file input and verifies it's uploaded
    */
-  async uploadFile(fileInputSelector, filePath, successIndicator) {
+  async uploadFile(fileInputSelector, filePath, successIndicator, uploadButtonSelector = null) {
     try {
       // Wait for file input to be ready
       await this.browser.waitForSelector(fileInputSelector);
@@ -196,14 +221,21 @@ export class ActionHelpers {
       const page = this.getPage();
       await page.setInputFiles(fileInputSelector, filePath);
       
+      // Click upload button if specified
+      if (uploadButtonSelector) {
+        await this.browser.waitForSelector(uploadButtonSelector);
+        await this.browser.click(uploadButtonSelector);
+        console.log(chalk.green(`✓ Clicked upload button: `) + chalk.bold.green(`${uploadButtonSelector}`));
+      }
+      
       // Wait for upload to complete
       if (successIndicator) {
         await this.browser.waitForSelector(successIndicator, 30000);
-        console.log(chalk.green(`✓ File uploaded successfully: ${path.basename(filePath)}`));
+        console.log(chalk.green(`✓ File uploaded successfully: `) + chalk.bold.green(`${path.basename(filePath)}`));
       } else {
         // Wait for any upload progress to complete
         await this.browser.waitForLoadState('networkidle');
-        console.log(chalk.green(`✓ File upload completed: ${path.basename(filePath)}`));
+        console.log(chalk.green(`✓ File upload completed: `) + chalk.bold.green(`${path.basename(filePath)}`));
       }
       
       return true;
@@ -253,7 +285,7 @@ export class ActionHelpers {
         }
       }
       
-      console.log(chalk.green(`✓ File downloaded and verified: ${path.basename(downloadPath)} (${fileSize} bytes)`));
+              console.log(chalk.green(`✓ File downloaded and verified: `) + chalk.bold.green(`${path.basename(downloadPath)}`) + chalk.green(` (${fileSize} bytes)`));
       
       // Clean up downloaded file
       fs.unlinkSync(downloadPath);
@@ -272,16 +304,14 @@ export class ActionHelpers {
     try {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const filename = `${name}_${timestamp}.png`;
-      const screenshotPath = path.join('screenshots', filename);
       
-      // Ensure screenshots directory exists
-      if (!fs.existsSync('screenshots')) {
-        fs.mkdirSync('screenshots', { recursive: true });
-      }
+      // Use the screenshot manager to get the proper path for step screenshots
+      const screenshotManager = new (await import('../utils/screenshots.js')).ScreenshotManager();
+      const screenshotPath = screenshotManager.getStepScreenshotPath(filename);
       
       await this.browser.screenshot(screenshotPath, options);
       
-              console.log(chalk.green(`✓ Screenshot saved:`) + ` ${screenshotPath}`);
+      console.log(chalk.green(`✓ Screenshot saved: `) + chalk.bold.green(`${screenshotPath}`));
       return screenshotPath;
     } catch (error) {
       console.error(chalk.red(`✗ Screenshot failed: ${error.message}`));
@@ -296,7 +326,8 @@ export class ActionHelpers {
    */
   async verifyTableRow(tableSelector, expectedRow) {
     try {
-      const tableData = await this.browser.evaluate((selector, expected) => {
+      const page = this.getPage();
+      const tableData = await page.evaluate(({ selector, expected }) => {
         const table = document.querySelector(selector);
         if (!table) return null;
         
@@ -319,7 +350,7 @@ export class ActionHelpers {
         }
         
         return false;
-      }, tableSelector, expectedRow);
+      }, { selector: tableSelector, expected: expectedRow });
       
       if (tableData) {
         console.log(chalk.green(`✓ Table row verified successfully`));
@@ -362,7 +393,7 @@ export class ActionHelpers {
       }
       
       if (assertionPassed) {
-        console.log(chalk.green(`✓ Element count assertion passed: ${actualCount} ${operator} ${expectedCount}`));
+        console.log(chalk.green(`✓ Element count assertion passed: `) + chalk.bold.green(`${actualCount} ${operator} ${expectedCount}`));
         return true;
       } else {
         throw new Error(`Element count assertion failed: ${actualCount} ${operator} ${expectedCount}`);
@@ -397,7 +428,7 @@ export class ActionHelpers {
         }
       }
       
-      console.log(chalk.green(`✓ API response check passed: ${response.status()}`));
+              console.log(chalk.green(`✓ API response check passed: `) + chalk.bold.green(`${response.status()}`));
       return response;
     } catch (error) {
       console.error(chalk.red(`✗ API response check failed: ${error.message}`));
@@ -416,7 +447,7 @@ export class ActionHelpers {
       const isVisible = await this.browser.isVisible(selector);
       
       if (!isVisible) {
-        console.log(chalk.green(`✓ Element not present as expected: ${selector}`));
+        console.log(chalk.green(`✓ Element not present as expected: `) + chalk.bold.green(`${selector}`));
         return true;
       } else {
         throw new Error(`Element should not be present: ${selector}`);
@@ -446,7 +477,7 @@ export class ActionHelpers {
       const endTime = performance.now();
       const duration = endTime - startTime;
       
-      console.log(chalk.green(`✓ Performance measured: ${action} took ${duration.toFixed(2)}ms`));
+              console.log(chalk.green(`✓ Performance measured: `) + chalk.bold.green(`${action}`) + chalk.green(` took `) + chalk.bold.green(`${duration.toFixed(2)}ms`));
       
       // Store performance data for later comparison
       this.variables.set(`performance_${action}`, duration);
@@ -478,7 +509,7 @@ export class ActionHelpers {
         }
       }
       
-      console.log(chalk.green(`✓ Repeat completed: ${count} iterations`));
+              console.log(chalk.green(`✓ Repeat completed: `) + chalk.bold.green(`${count} iterations`));
       return true;
     } catch (error) {
       console.error(chalk.red(`✗ Repeat failed: ${error.message}`));
@@ -513,7 +544,7 @@ export class ActionHelpers {
           await this.executeStep(step);
         }
         
-        console.log(chalk.green(`✓ Conditional execution completed`));
+        console.log(chalk.green(`✓ Conditional execution completed successfully`));
         return true;
       } else {
         console.log(chalk.yellow(`Condition not met, skipping steps`));
@@ -535,7 +566,7 @@ export class ActionHelpers {
       // Store in variables map
       this.variables.set(variableName, text);
       
-      console.log(chalk.green(`✓ Stored text: "${text}" → $${variableName}`));
+              console.log(chalk.green(`✓ Stored text: `) + chalk.bold.green(`"${text}"`) + chalk.green(` → `) + chalk.bold.green(`$${variableName}`));
       return text;
     } catch (error) {
       console.error(chalk.red(`✗ Store text failed: ${error.message}`));
@@ -588,7 +619,7 @@ export class ActionHelpers {
       }
       
       if (comparisonPassed) {
-        console.log(chalk.green(`✓ Comparison passed: ${resolvedValue1} ${operator} ${resolvedValue2}`));
+        console.log(chalk.green(`✓ Comparison passed: `) + chalk.bold.green(`${resolvedValue1} ${operator} ${resolvedValue2}`));
         return true;
       } else {
         throw new Error(`Comparison failed: ${resolvedValue1} ${operator} ${resolvedValue2}`);
@@ -633,6 +664,10 @@ export class ActionHelpers {
           case 'password':
             randomValue = this.generateRandomPassword();
             break;
+          case 'age':
+          case 'number':
+            randomValue = String(Math.floor(Math.random() * 100) + 18); // Generate age 18-117 as string
+            break;
           default:
             randomValue = `test_${fieldType}_${Date.now()}`;
         }
@@ -641,6 +676,7 @@ export class ActionHelpers {
         await this.browser.waitForSelector(selector);
         await this.browser.type(selector, randomValue);
       }
+      console.log(chalk.green(`✓ Random form filling completed successfully`));
       return true;
     } catch (error) {
       console.error(chalk.red(`✗ Random fill failed: ${error.message}`));
@@ -669,7 +705,7 @@ export class ActionHelpers {
         }
       }
       
-      console.log(chalk.green(`✓ Viewport resized to ${width}x${height}`));
+              console.log(chalk.green(`✓ Viewport resized to `) + chalk.bold.green(`${width}x${height}`));
       return true;
     } catch (error) {
       console.error(chalk.red(`✗ Viewport resize failed: ${error.message}`));
@@ -735,7 +771,7 @@ export class ActionHelpers {
       await page.mouse.move(endX, endY);
       await page.mouse.up();
       
-      console.log(chalk.green(`✓ Swiped ${direction} on ${selector}`));
+              console.log(chalk.green(`✓ Swiped `) + chalk.bold.green(`${direction}`) + chalk.green(` on `) + chalk.bold.green(`${selector}`));
       return true;
     } catch (error) {
       console.error(chalk.red(`✗ Swipe failed: ${error.message}`));
@@ -769,7 +805,7 @@ export class ActionHelpers {
       await page.mouse.down();
       await page.mouse.up();
       
-      console.log(chalk.green(`✓ Tapped ${selector}`));
+              console.log(chalk.green(`✓ Tapped `) + chalk.bold.green(`${selector}`));
       return true;
     } catch (error) {
       console.error(chalk.red(`✗ Tap failed: ${error.message}`));
@@ -818,7 +854,7 @@ export class ActionHelpers {
       await page.mouse.move(targetCenterX, targetCenterY);
       await page.mouse.up();
       
-      console.log(chalk.green(`✓ Dragged ${sourceSelector} to ${targetSelector}`));
+              console.log(chalk.green(`✓ Dragged `) + chalk.bold.green(`${sourceSelector}`) + chalk.green(` to `) + chalk.bold.green(`${targetSelector}`));
       return true;
     } catch (error) {
       console.error(chalk.red(`✗ Drag and drop failed: ${error.message}`));
@@ -869,7 +905,7 @@ export class ActionHelpers {
         }
       }
       
-      console.log(chalk.green(`✓ Selected multiple options: ${options.join(', ')}`));
+              console.log(chalk.green(`✓ Selected multiple options: `) + chalk.bold.green(`${options.join(', ')}`));
       return true;
     } catch (error) {
       console.error(chalk.red(`✗ Multi-select failed: ${error.message}`));
@@ -893,7 +929,7 @@ export class ActionHelpers {
       // Press the key combination
       await page.keyboard.press(keys.join('+'));
       
-      console.log(chalk.green(`✓ Pressed keys: ${keys.join(' + ')}`));
+              console.log(chalk.green(`✓ Pressed keys: `) + chalk.bold.green(`${keys.join(' + ')}`));
       return true;
     } catch (error) {
       console.error(chalk.red(`✗ Key press failed: ${error.message}`));
@@ -914,7 +950,7 @@ export class ActionHelpers {
       // Scroll to element
       await page.locator(selector).scrollIntoViewIfNeeded();
       
-      console.log(chalk.green(`✓ Scrolled to element: ${selector}`));
+              console.log(chalk.green(`✓ Scrolled to element: `) + chalk.bold.green(`${selector}`));
       return true;
     } catch (error) {
       console.error(chalk.red(`✗ Scroll to element failed: ${error.message}`));
@@ -940,7 +976,7 @@ export class ActionHelpers {
         await new Promise(resolve => setTimeout(resolve, duration));
       }
       
-      console.log(chalk.green(`✓ Hovered over element: ${selector}`));
+              console.log(chalk.green(`✓ Hovered over element: `) + chalk.bold.green(`${selector}`));
       return true;
     } catch (error) {
       console.error(chalk.red(`✗ Hover failed: ${error.message}`));

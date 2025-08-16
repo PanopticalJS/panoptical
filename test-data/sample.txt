@@ -1,0 +1,10 @@
+This is a sample test file for Panoptical testing.
+It contains some sample text that can be used to test file upload functionality.
+
+Features tested:
+- File upload
+- File content verification
+- File size checking
+
+This file is used by the demo-practical-features-test.yaml to demonstrate
+the upload_file action helper.

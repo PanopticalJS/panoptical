@@ -1,0 +1,250 @@
+test: "Essential Panoptical Features Demo"
+description: "Focused test demonstrating the most important Panoptical automation features"
+browser: chromium
+headless: false
+timeout: 30000
+
+setup:
+  - goto: "https://the-internet.herokuapp.com"
+  - wait:
+      selector: "h1"
+      timeout: 10000
+
+steps:  
+  # Basic navigation and waiting
+  - goto: "https://the-internet.herokuapp.com/login"
+  - wait:
+      selector: "#login"
+      timeout: 5000
+
+  # Smart login with automatic verification
+  - login:
+      username: "tomsmith"
+      password: "SuperSecretPassword!"
+      usernameSelector: "#username"
+      passwordSelector: "#password"
+      submitSelector: "#login button[type='submit']"
+      successIndicator: ".flash.success"
+
+  # Navigate to form elements
+  - goto: "https://the-internet.herokuapp.com/dropdown"
+  - wait:
+      selector: "#dropdown"
+      timeout: 5000
+
+  # Human-friendly dropdown selection
+  - selectOption:
+      selector: "#dropdown"
+      value: "1"
+
+  # Navigate to file upload
+  - goto: "https://the-internet.herokuapp.com/upload"
+  - wait:
+      selector: "#file-upload"
+      timeout: 5000
+
+  # File upload with verification
+  - upload_file:
+      fileInputSelector: "#file-upload"
+      filePath: "./test-data/sample.txt"
+      uploadButtonSelector: "#file-submit"
+      successIndicator: "h3"
+
+  # Take named screenshot
+  - take_screenshot:
+      name: "after-file-upload"
+      options:
+        fullPage: true
+
+  # Navigate to tables
+  - goto: "https://the-internet.herokuapp.com/tables"
+  - wait:
+      selector: "#table1"
+      timeout: 5000
+
+  # Verify table data exists
+  - expect:
+      selector: "#table1"
+      text: "Smith"
+  - expect:
+      selector: "#table1"
+      text: "John"
+  - expect:
+      selector: "#table1"
+      text: "jsmith@gmail.com"
+
+  # Check element count
+  - assert_element_count:
+      selector: "#table1 tbody tr"
+      expectedCount: 4
+      operator: "=="
+
+  # Navigate to dynamic elements
+  - goto: "https://the-internet.herokuapp.com/dynamic_controls"
+  - wait:
+      selector: "#checkbox"
+      timeout: 5000
+
+  # Click checkbox button to trigger dynamic change
+  - click: "#checkbox-example button"
+
+  # Wait for message to appear
+  - wait:
+      selector: "#message"
+      timeout: 10000
+
+  # Store text in variable
+  - store_text:
+      selector: "#message"
+      variableName: "checkboxMessage"
+
+  # Wait for message change
+  - wait:
+      text: "It's gone!"
+      timeout: 10000
+
+  # Verify the message is correct
+  - expect:
+      selector: "#message"
+      text: "It's gone!"
+
+  # Navigate to drag and drop
+  - goto: "https://the-internet.herokuapp.com/drag_and_drop"
+  - wait:
+      selector: "#column-a"
+      timeout: 5000
+
+  # Drag and drop
+  - drag_and_drop:
+      source: "#column-a"
+      target: "#column-b"
+
+  # Verify drag and drop result
+  - wait:
+      selector: "#column-b header"
+      timeout: 5000
+
+  # Navigate to hover
+  - goto: "https://the-internet.herokuapp.com/hovers"
+  - wait:
+      selector: ".figure"
+      timeout: 5000
+
+  # Hover interaction
+  - hover_element:
+      selector: ".figure"
+      duration: 2000
+
+  # Navigate to key presses
+  - goto: "https://the-internet.herokuapp.com/key_presses"
+  - wait:
+      selector: "#target"
+      timeout: 5000
+
+  # Keyboard interaction
+  - press_keys:
+      keys: ["Tab"]
+      targetSelector: "#target"
+
+  # Navigate to infinite scroll
+  - goto: "https://the-internet.herokuapp.com/infinite_scroll"
+  - wait:
+      selector: ".jscroll-inner"
+      timeout: 5000
+
+  # Scroll to element
+  - scroll_to_element:
+      selector: ".jscroll-inner"
+      behavior: "smooth"
+
+  # Navigate to checkboxes
+  - goto: "https://the-internet.herokuapp.com/checkboxes"
+  - wait:
+      selector: "input[type='checkbox']"
+      timeout: 5000
+
+  # Check first checkbox
+  - click: "input[type='checkbox']:first-of-type"
+
+  # Navigate to form
+  - goto: "https://the-internet.herokuapp.com/inputs"
+  - wait:
+      selector: "input[type='number']"
+      timeout: 5000
+
+  # Random form filling
+  - random_fill:
+      formData:
+        "input[type='number']": "age"
+
+  # Navigate to slow loading
+  - goto: "https://the-internet.herokuapp.com/dynamic_loading/1"
+  - wait:
+      selector: "#start button"
+      timeout: 5000
+
+  # Click and wait for loading
+  - click: "#start button"
+  - wait:
+      selector: "#finish h4"
+      timeout: 15000
+
+  # Performance measurement
+  - measure_performance:
+      action: "pageLoad"
+      options:
+        metric: "loadTime"
+
+  # Navigate to alerts
+  - goto: "https://the-internet.herokuapp.com/javascript_alerts"
+  - wait:
+      selector: "button[onclick='jsAlert()']"
+      timeout: 5000
+
+  # Handle JavaScript alert
+  - click: "button[onclick='jsAlert()']"
+  - wait:
+      selector: "#result"
+      timeout: 5000
+
+  # Navigate to windows
+  - goto: "https://the-internet.herokuapp.com/windows"
+  - wait:
+      selector: ".example a"
+      timeout: 5000
+
+  # Click if visible (won't fail if element not there)
+  - click_if_visible:
+      selector: ".example a"
+      options:
+        timeout: 3000
+
+  # Navigate to frames
+  - goto: "https://the-internet.herokuapp.com/iframe"
+  - wait:
+      selector: "#mce_0_ifr"
+      timeout: 5000
+
+  # Work with iframe content
+  - evaluate:
+      selector: "#mce_0_ifr"
+      script: |
+        const iframe = document.querySelector('#mce_0_ifr');
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        const editor = iframeDoc.querySelector('#tinymce');
+        if (editor) {
+          editor.innerHTML = 'Hello from Panoptical!';
+        }
+
+  # Take final screenshot
+  - snapshot: "final-state"
+
+  # Final verification
+  - expect:
+      selector: "body"
+      text: "TinyMCE"
+
+teardown:
+  - goto: "https://the-internet.herokuapp.com"
+  - take_screenshot:
+      name: "teardown-complete"

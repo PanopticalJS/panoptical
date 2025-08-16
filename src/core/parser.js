@@ -105,7 +105,7 @@ export async function runDeclarativeTest(filePath, options = {}) {
     try {
       const filename = path.basename(filePath, '.yaml');
       const failureFilename = screenshotManager.generateTestFailureFilename(filename);
-      const failurePath = screenshotManager.getScreenshotPath(failureFilename);
+      const failurePath = screenshotManager.getFailureScreenshotPath(failureFilename);
       await browser.screenshot(failurePath);
       screenshotInfo = `Screenshot: ${failureFilename}`;
     } catch (screenshotError) {
@@ -220,13 +220,13 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
       if (step.selectOption) {
         await browser.waitForSelector(step.selectOption.selector);
         await browser.selectOption(step.selectOption.selector, step.selectOption.value);
-        console.log(chalk.green(`✓ Selected`) + ` "${step.selectOption.value}" ` + chalk.green(`from`) + ` ${step.selectOption.selector}`);
+        console.log(chalk.green(`✓ Selected `) + chalk.bold.green(`"${step.selectOption.value}"`) + chalk.green(` from `) + chalk.bold.green(`${step.selectOption.selector}`));
       }
       
       if (step.evaluate) {
         await browser.waitForSelector(step.evaluate.selector);
         await browser.evaluate(step.evaluate.script, step.evaluate.selector);
-        console.log(chalk.green(`✓ Executed script on`) + ` ${step.evaluate.selector}`);
+        console.log(chalk.green(`✓ Executed script on `) + chalk.bold.green(`${step.evaluate.selector}`));
       }
       
       if (step.randomFill) {
@@ -266,7 +266,7 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
       
       if (step.snapshot) {
         const filename = screenshotManager.generateTestSuccessFilename(testName, step.snapshot);
-        const screenshotPath = screenshotManager.getScreenshotPath(filename);
+        const screenshotPath = screenshotManager.getSuccessScreenshotPath(filename);
         await browser.screenshot(screenshotPath);
         console.log(chalk.green(`✓ Screenshot `) + chalk.bold.green(`${filename}`) + chalk.green(` is taken`));
       }
@@ -317,8 +317,8 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
 
       // 8. upload_file - Uploads and verifies file
       if (step.upload_file) {
-        const { fileInputSelector, filePath, successIndicator } = step.upload_file;
-        await browser.uploadFile(fileInputSelector, filePath, successIndicator);
+        const { fileInputSelector, filePath, successIndicator, uploadButtonSelector } = step.upload_file;
+        await browser.uploadFile(fileInputSelector, filePath, successIndicator, uploadButtonSelector);
       }
 
       // 9. download_and_verify - Downloads and verifies file
