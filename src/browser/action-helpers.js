@@ -50,8 +50,43 @@ export class ActionHelpers {
       
       // Wait for successful login
       if (successIndicator) {
-        await this.browser.waitForSelector(successIndicator, 30000);
-        console.log(chalk.green(`✓ Successfully logged in as `) + chalk.bold.green(`${username}`));
+        if (typeof successIndicator === 'string') {
+          // Check if it's a selector (starts with #, ., [, etc.) or text
+          if (successIndicator.startsWith('#') || successIndicator.startsWith('.') || successIndicator.startsWith('[')) {
+            // It's a selector
+            await this.browser.waitForSelector(successIndicator, 30000);
+            console.log(chalk.green(`✓ Successfully logged in as `) + chalk.bold.green(`${username}`));
+          } else {
+            // It's text to search for
+            const page = this.getPage();
+            await page.waitForFunction(
+              (searchText) => {
+                if (!document || !document.body) return false;
+                return document.body.innerText && document.body.innerText.includes(searchText);
+              },
+              successIndicator,
+              { timeout: 30000 }
+            );
+            console.log(chalk.green(`✓ Successfully logged in as `) + chalk.bold.green(`${username}`));
+          }
+        } else if (typeof successIndicator === 'object') {
+          // Object format: { selector: "#element", text: "Dashboard" }
+          if (successIndicator.selector) {
+            await this.browser.waitForSelector(successIndicator.selector, 30000);
+          }
+          if (successIndicator.text) {
+            const page = this.getPage();
+            await page.waitForFunction(
+              (searchText) => {
+                if (!document || !document.body) return false;
+                return document.body.innerText && document.body.innerText.includes(searchText);
+              },
+              successIndicator.text,
+              { timeout: 30000 }
+            );
+          }
+          console.log(chalk.green(`✓ Successfully logged in as `) + chalk.bold.green(`${username}`));
+        }
       } else {
         // Wait for navigation or URL change
         await this.browser.waitForLoadState('networkidle');
@@ -68,22 +103,74 @@ export class ActionHelpers {
   /**
    * logout - Logs out and verifies the user is redirected to the login screen
    */
-  async logout(logoutSelector, loginPageIndicator) {
+  async logout(logoutSelector, successIndicator) {
     try {
-      // Click logout button/link
-      await this.browser.waitForSelector(logoutSelector);
-      await this.browser.click(logoutSelector);
+      // Handle flexible logout selector (selector, text, or object)
+      if (typeof logoutSelector === 'string') {
+        // Check if it's a selector (starts with #, ., [, etc.) or text
+        if (logoutSelector.startsWith('#') || logoutSelector.startsWith('.') || logoutSelector.startsWith('[')) {
+          // It's a selector
+          await this.browser.waitForSelector(logoutSelector);
+          await this.browser.click(logoutSelector);
+        } else {
+          // It's text to search for and click
+          const page = this.getPage();
+          await page.waitForFunction(
+            (searchText) => {
+              if (!document || !document.body) return false;
+              return document.body.innerText && document.body.innerText.includes(searchText);
+            },
+            logoutSelector,
+            { timeout: 30000 }
+          );
+          await page.click(`text="${logoutSelector}"`);
+        }
+      } else if (typeof logoutSelector === 'object') {
+        // Object format: { selector: "#element", text: "Log Out" }
+        if (logoutSelector.selector) {
+          await this.browser.waitForSelector(logoutSelector.selector);
+          await this.browser.click(logoutSelector.selector);
+        }
+        if (logoutSelector.text) {
+          const page = this.getPage();
+          await page.waitForFunction(
+            (searchText) => {
+              if (!document || !document.body) return false;
+              return document.body.innerText && document.body.innerText.includes(searchText);
+            },
+            logoutSelector.text,
+            { timeout: 30000 }
+          );
+          await page.click(`text="${logoutSelector.text}"`);
+        }
+      }
       
       // Wait for logout to complete
       await this.browser.waitForLoadState('networkidle');
       
-              // Verify we're on login page
-        if (loginPageIndicator) {
-          await this.browser.waitForSelector(loginPageIndicator, 30000);
-          console.log(chalk.green(`✓ Successfully logged out`));
-        } else {
-          console.log(chalk.green(`✓ Logout completed`));
+      // Verify we're on login page
+      if (successIndicator) {
+        if (typeof successIndicator === 'string') {
+          // Check if it's a selector or text
+          if (successIndicator.startsWith('#') || successIndicator.startsWith('.') || successIndicator.startsWith('[')) {
+            await this.browser.waitForSelector(successIndicator, 30000);
+          } else {
+            // It's text to search for
+            const page = this.getPage();
+            await page.waitForFunction(
+              (searchText) => {
+                if (!document || !document.body) return false;
+                return document.body.innerText && document.body.innerText.includes(searchText);
+              },
+              successIndicator,
+              { timeout: 30000 }
+            );
+          }
         }
+        console.log(chalk.green(`✓ Successfully logged out`));
+      } else {
+        console.log(chalk.green(`✓ Logout completed`));
+      }
       
       return true;
     } catch (error) {

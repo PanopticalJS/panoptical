@@ -276,170 +276,162 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
         console.log(chalk.green(`✓ Paused for `) + chalk.bold.green(`${step.pause}ms`));
       }
 
-      // ===== New Action Helper Steps =====
-
-      // 1. login - Logs in with username/password
+      // login - Logs in with username/password
       if (step.login) {
         await browser.login(step.login);
       }
 
-      // 2. logout - Logs out and verifies redirect
+      // logout - Logs out and verifies redirect
       if (step.logout) {
-        const { selector, loginPageIndicator } = step.logout;
-        await browser.logout(selector, loginPageIndicator);
+        const { logoutSelector, successIndicator } = step.logout;
+        await browser.logout(logoutSelector, successIndicator);
       }
 
-      // 3. goto_with_auth - Navigates with auth token
+      // goto_with_auth - Navigates with auth token
       if (step.goto_with_auth) {
         const { url, authToken, tokenHeader } = step.goto_with_auth;
         await browser.gotoWithAuth(url, authToken, tokenHeader);
       }
 
-
-
-      // 5. click_if_visible - Clicks only if visible
+      // click_if_visible - Clicks only if visible
       if (step.click_if_visible) {
         const { selector, options } = step.click_if_visible;
         await browser.clickIfVisible(selector, options);
       }
 
-      // 6. select_from_dropdown - Selects dropdown option by text
+      // select_from_dropdown - Selects dropdown option by text
       if (step.select_from_dropdown) {
         const { selector, optionText, options } = step.select_from_dropdown;
         await browser.selectFromDropdown(selector, optionText, options);
       }
 
-      // 7. hover_and_click - Hover then click submenu
+      // hover_and_click - Hover then click submenu
       if (step.hover_and_click) {
         const { hoverSelector, clickSelector, options } = step.hover_and_click;
         await browser.hoverAndClick(hoverSelector, clickSelector, options);
       }
 
-      // 8. upload_file - Uploads and verifies file
+      // upload_file - Uploads and verifies file
       if (step.upload_file) {
         const { fileInputSelector, filePath, successIndicator, uploadButtonSelector } = step.upload_file;
         await browser.uploadFile(fileInputSelector, filePath, successIndicator, uploadButtonSelector);
       }
 
-      // 9. download_and_verify - Downloads and verifies file
+      // download_and_verify - Downloads and verifies file
       if (step.download_and_verify) {
         const { downloadSelector, expectedSize, expectedContent } = step.download_and_verify;
         await browser.downloadAndVerify(downloadSelector, expectedSize, expectedContent);
       }
 
-      // 10. take_screenshot - Takes named screenshot
+      // take_screenshot - Takes named screenshot
       if (step.take_screenshot) {
         const { name, options } = step.take_screenshot;
         await browser.takeScreenshot(name, options);
       }
 
-      // 11. verify_table_row - Verifies table contains specific row
+      // verify_table_row - Verifies table contains specific row
       if (step.verify_table_row) {
         const { tableSelector, expectedRow } = step.verify_table_row;
         await browser.verifyTableRow(tableSelector, expectedRow);
       }
 
-      // 12. assert_element_count - Asserts element count
+      // assert_element_count - Asserts element count
       if (step.assert_element_count) {
         const { selector, expectedCount, operator } = step.assert_element_count;
         await browser.assertElementCount(selector, expectedCount, operator);
       }
 
-      // 13. check_api_response - Checks API response
+      // check_api_response - Checks API response
       if (step.check_api_response) {
         const { url, method, headers, body, expectedStatus, expectedContent } = step.check_api_response;
         await browser.checkApiResponse(url, method, headers, body, expectedStatus, expectedContent);
       }
 
-      // 14. assert_element_not_present - Asserts element doesn't exist
+      // assert_element_not_present - Asserts element doesn't exist
       if (step.assert_element_not_present) {
         const { selector, timeout } = step.assert_element_not_present;
         await browser.assertElementNotPresent(selector, timeout || browser.browser.options.timeout);
       }
 
-      // 15. measure_performance - Measures performance
+      // measure_performance - Measures performance
       if (step.measure_performance) {
         const { action, options } = step.measure_performance;
         await browser.measurePerformance(action, options);
       }
 
-      // 16. repeat - Repeats steps
+      // repeat - Repeats steps
       if (step.repeat) {
         const { steps: repeatSteps, count, options } = step.repeat;
         await browser.repeat(repeatSteps, count, options);
       }
 
-      // 17. run_if - Runs steps conditionally
+      // run_if - Runs steps conditionally
       if (step.run_if) {
         const { condition, steps: conditionalSteps, options } = step.run_if;
         await browser.runIf(condition, conditionalSteps, options);
       }
 
-      // 18. store_text - Stores text in variable
+      // store_text - Stores text in variable
       if (step.store_text) {
         const { selector, variableName } = step.store_text;
         await browser.storeText(selector, variableName);
       }
 
-      // 19. compare_values - Compares values
+      // compare_values - Compares values
       if (step.compare_values) {
         const { value1, value2, operator, options } = step.compare_values;
         await browser.compareValues(value1, value2, operator, options);
       }
 
-      // 20. random_fill - Fills form with random data
+      // random_fill - Fills form with random data
       if (step.random_fill) {
         const { formData } = step.random_fill;
         await browser.randomFill(formData);
       }
 
-      // ===== Mobile & Responsive Testing =====
-
-      // 21. resize_viewport - Resizes viewport for responsive testing
+      // resize_viewport - Resizes viewport for responsive testing
       if (step.resize_viewport) {
         const { width, height, device } = step.resize_viewport;
         await browser.resizeViewport(width, height, device);
       }
 
-      // 22. swipe - Performs swipe gesture
+      // swipe - Performs swipe gesture
       if (step.swipe) {
         const { selector, direction, distance } = step.swipe;
         await browser.swipe(selector, direction, distance);
       }
 
-      // 23. tap - Performs tap gesture
+      // tap - Performs tap gesture
       if (step.tap) {
         const { selector, pressure } = step.tap;
         await browser.tap(selector, pressure);
       }
 
-      // ===== Advanced Element Interactions =====
-
-      // 24. drag_and_drop - Drags and drops elements
+      // drag_and_drop - Drags and drops elements
       if (step.drag_and_drop) {
         const { source, target } = step.drag_and_drop;
         await browser.dragAndDrop(source, target);
       }
 
-      // 25. multi_select - Selects multiple options
+      // multi_select - Selects multiple options
       if (step.multi_select) {
         const { selector, options } = step.multi_select;
         await browser.multiSelect(selector, options);
       }
 
-      // 26. press_keys - Presses keyboard keys
+      // press_keys - Presses keyboard keys
       if (step.press_keys) {
         const { keys, targetSelector } = step.press_keys;
         await browser.pressKeys(keys, targetSelector);
       }
 
-      // 27. scroll_to_element - Scrolls to element
+      // scroll_to_element - Scrolls to element
       if (step.scroll_to_element) {
         const { selector, behavior } = step.scroll_to_element;
         await browser.scrollToElement(selector, behavior);
       }
 
-      // 28. hover_element - Hovers over element
+      // hover_element - Hovers over element
       if (step.hover_element) {
         const { selector, duration } = step.hover_element;
         await browser.hoverElement(selector, duration);

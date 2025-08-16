@@ -24,7 +24,7 @@ steps:
       usernameSelector: "#username"
       passwordSelector: "#password"
       submitSelector: "#login button[type='submit']"
-      successIndicator: ".flash.success"
+      successIndicator: "Welcome to the Secure Area"
 
   # Navigate to form elements
   - goto: "https://the-internet.herokuapp.com/dropdown"
