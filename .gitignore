@@ -17,6 +17,7 @@ artifacts/
 # Panoptical specific
 .panoptical/
 *.pan
+docs/
 
 # Runtime data
 pids

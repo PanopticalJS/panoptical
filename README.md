@@ -5,10 +5,22 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![Playwright](https://img.shields.io/badge/Playwright-1.54+-blue.svg)](https://playwright.dev/)
-[![npm version](https://badge.fury.io/js/panoptical.svg)](https://badge.fury.io/js/panoptical)
+[![npm version](https://badge.fury.io/js/panoptical.svg)](https://www.npmjs.com/package/panoptical)
 [![npm downloads](https://img.shields.io/npm/dm/panoptical.svg)](https://www.npmjs.com/package/panoptical)
 
 ![Banner](https://panoptical.dev/testing/ghbanner.jpg)
+
+## **Documentation**
+
+**[Full Documentation](https://panoptical.dev)** - Comprehensive guides, examples, and API reference
+
+**[Getting Started](https://panoptical.dev/docs/getting-started)** - Write your first test in minutes
+
+**[Examples](https://panoptical.dev/docs/examples/basic-testing)** - Real-world test scenarios
+
+**[CLI Reference](https://panoptical.dev/docs/cli/commands)** - Complete command reference
+
+---
 
 ## **What is Panoptical?**
 
@@ -386,6 +398,7 @@ panoptical/
 │   └── utils/             # Utility functions (screenshots)
 ├── tests/                 # Test files
 │   └── test-page.html     # Test HTML page
+├── docs/                  # Documentation (Docusaurus)
 ├── package.json           # Dependencies & scripts
 └── README.md              # This file
 ```
@@ -566,3 +579,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Panoptical** - Playwright made simple with YAML. 🚀
+
+**📚 [Full Documentation](https://panoptical.dev)** | **🐛 [Report Issues](https://github.com/PanopticalJS/panoptical/issues)** | **💬 [Discussions](https://github.com/PanopticalJS/panoptical/discussions)**
