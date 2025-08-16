@@ -86,6 +86,7 @@ Panoptical includes **powerful automation methods** that transform it from a bas
 - **`press_keys`** - Keyboard shortcuts and key combinations
 - **`scroll_to_element`** - Scroll to make elements visible
 - **`hover_element`** - Hover interactions with configurable duration
+- **`iframe_action`** - Perform actions inside iframes (click, type, get_text, evaluate, etc.)
 
 ## **Quick Start**
 

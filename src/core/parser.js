@@ -436,6 +436,12 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
         const { selector, duration } = step.hover_element;
         await browser.hoverElement(selector, duration);
       }
+
+      // iframe_action - Performs actions inside iframes
+      if (step.iframe_action) {
+        const { iframeSelector, action, targetSelector, options } = step.iframe_action;
+        await browser.iframeAction(iframeSelector, action, targetSelector, options);
+      }
       
     } catch (error) {
       const stepNumber = i + 1;
