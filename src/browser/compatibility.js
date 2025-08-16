@@ -450,6 +450,16 @@ export class PanopticalCompatibility {
   }
 
   /**
+   * iframe_action - Performs actions inside iframes
+   */
+  async iframeAction(iframeSelector, action, targetSelector, options) {
+    if (!this.actions) {
+      throw new Error('Browser not launched. Call launch() first.');
+    }
+    return await this.actions.iframeAction(iframeSelector, action, targetSelector, options);
+  }
+
+  /**
    * Get all stored variables
    */
   getVariables() {

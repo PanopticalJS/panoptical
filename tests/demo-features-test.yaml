@@ -225,16 +225,24 @@ steps:
       selector: "#mce_0_ifr"
       timeout: 5000
 
-  # Work with iframe content
-  - evaluate:
-      selector: "#mce_0_ifr"
-      script: |
-        const iframe = document.querySelector('#mce_0_ifr');
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-        const editor = iframeDoc.querySelector('#tinymce');
-        if (editor) {
-          editor.innerHTML = 'Hello from Panoptical!';
-        }
+  # Work with iframe content using the iframe_action helper
+  - iframe_action:
+      iframeSelector: "#mce_0_ifr"
+      action: "wait"
+      targetSelector: "body"
+      timeout: 5000
+  
+  # Get the current text content from iframe
+  - iframe_action:
+      iframeSelector: "#mce_0_ifr"
+      action: "get_text"
+      targetSelector: "body"
+  
+  # Check if the iframe body is visible
+  - iframe_action:
+      iframeSelector: "#mce_0_ifr"
+      action: "is_visible"
+      targetSelector: "body"
 
   # Take final screenshot
   - snapshot: "final-state"

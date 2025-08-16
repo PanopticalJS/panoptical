@@ -1063,10 +1063,89 @@ export class ActionHelpers {
         await new Promise(resolve => setTimeout(resolve, duration));
       }
       
-              console.log(chalk.green(`✓ Hovered over element: `) + chalk.bold.green(`${selector}`));
+      console.log(chalk.green(`✓ Hovered over element: `) + chalk.bold.green(`${selector}`));
       return true;
     } catch (error) {
       console.error(chalk.red(`✗ Hover failed: ${error.message}`));
+      throw error;
+    }
+  }
+
+  /**
+   * iframe_action - Performs actions inside iframes (click, type, get_text, etc.)
+   */
+  async iframeAction(iframeSelector, action, targetSelector, options = {}) {
+    try {
+      const page = this.getPage();
+      
+      // Wait for iframe to be ready
+      await this.browser.waitForSelector(iframeSelector);
+      
+      // Get iframe element
+      const iframe = await page.locator(iframeSelector);
+      
+      // Wait for iframe content to load
+      await iframe.waitFor({ state: 'attached' });
+      
+      // Get iframe frame
+      const frame = iframe.contentFrame();
+      if (!frame) {
+        throw new Error(`Could not access iframe content: ${iframeSelector}`);
+      }
+      
+      // Wait for target element in iframe using Playwright's locator API
+      const targetElement = frame.locator(targetSelector);
+      await targetElement.waitFor({ timeout: options.timeout || 10000 });
+      
+      let result = null;
+      
+      // Perform the requested action
+      switch (action.toLowerCase()) {
+        case 'click':
+          await targetElement.click();
+          console.log(chalk.green(`✓ Clicked `) + chalk.bold.green(`${targetSelector}`) + chalk.green(` in iframe `) + chalk.bold.green(`${iframeSelector}`));
+          break;
+          
+        case 'type':
+          const text = options.text || '';
+          if (!text) {
+            throw new Error('Text is required for type action');
+          }
+          await targetElement.fill(text);
+          console.log(chalk.green(`✓ Typed `) + chalk.bold.green(`"${text}"`) + chalk.green(` into `) + chalk.bold.green(`${targetSelector}`) + chalk.green(` in iframe `) + chalk.bold.green(`${iframeSelector}`));
+          break;
+          
+        case 'get_text':
+          result = await targetElement.textContent();
+          console.log(chalk.green(`✓ Got text from `) + chalk.bold.green(`${targetSelector}`) + chalk.green(` in iframe: `) + chalk.bold.green(`"${result}"`));
+          break;
+          
+        case 'wait':
+          await targetElement.waitFor({ timeout: options.timeout || 10000 });
+          console.log(chalk.green(`✓ Waited for `) + chalk.bold.green(`${targetSelector}`) + chalk.green(` in iframe `) + chalk.bold.green(`${iframeSelector}`));
+          break;
+          
+        case 'is_visible':
+          result = await targetElement.isVisible();
+          console.log(chalk.green(`✓ Element `) + chalk.bold.green(`${targetSelector}`) + chalk.green(` in iframe is `) + chalk.bold.green(result ? 'visible' : 'hidden'));
+          break;
+          
+        case 'evaluate':
+          const script = options.script || '';
+          if (!script) {
+            throw new Error('Script is required for evaluate action');
+          }
+          result = await targetElement.evaluate(script);
+          console.log(chalk.green(`✓ Executed script on `) + chalk.bold.green(`${targetSelector}`) + chalk.green(` in iframe `) + chalk.bold.green(`${iframeSelector}`));
+          break;
+          
+        default:
+          throw new Error(`Unsupported iframe action: ${action}. Use: click, type, get_text, wait, is_visible, or evaluate`);
+      }
+      
+      return result;
+    } catch (error) {
+      console.error(chalk.red(`✗ Iframe action failed: ${error.message}`));
       throw error;
     }
   }
