@@ -200,6 +200,36 @@ export class PanopticalBrowser {
   }
 
   /**
+   * Select option from dropdown with auto-healing
+   */
+  async selectOption(selector, value, options = {}) {
+    if (!this.page) {
+      throw new Error('Page not created. Call newPage() first.');
+    }
+
+    try {
+      await this.page.selectOption(selector, value, options);
+    } catch (error) {
+      // Try auto-healing the selector
+      console.log(`  Select option failed, attempting auto-healing...`);
+      const healer = new SelectorHealer(this.page);
+      const healedSelector = await healer.healSelector(selector, 'select');
+      
+      if (healedSelector) {
+        try {
+          await this.page.selectOption(healedSelector, value, options);
+          console.log(`  Select option succeeded with healed selector: ${healedSelector}`);
+        } catch (healedError) {
+          console.error(`  Auto-healing failed: ${healedError.message}`);
+          throw error; // Throw original error
+        }
+      } else {
+        throw error; // No healing possible, throw original error
+      }
+    }
+  }
+
+  /**
    * Wait for an element to appear with auto-healing
    */
   async waitForSelector(selector, timeout = null) {

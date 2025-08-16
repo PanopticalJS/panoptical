@@ -8,6 +8,9 @@ export class ScreenshotManager {
   constructor() {
     this.artifactsDir = './artifacts';
     this.screenshotsDir = './artifacts/screenshots';
+    this.successDir = './artifacts/screenshots/success';
+    this.failureDir = './artifacts/screenshots/failure';
+    this.stepDir = './artifacts/screenshots/steps';
     this.ensureScreenshotsDir();
   }
 
@@ -20,6 +23,15 @@ export class ScreenshotManager {
     }
     if (!fs.existsSync(this.screenshotsDir)) {
       fs.mkdirSync(this.screenshotsDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.successDir)) {
+      fs.mkdirSync(this.successDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.failureDir)) {
+      fs.mkdirSync(this.failureDir, { recursive: true });
+    }
+    if (!fs.existsSync(this.stepDir)) {
+      fs.mkdirSync(this.stepDir, { recursive: true });
     }
   }
 
@@ -73,15 +85,51 @@ export class ScreenshotManager {
   }
 
   /**
+   * Get path for step screenshots (manual screenshots taken during test)
+   */
+  getStepScreenshotPath(filename) {
+    return path.join(this.stepDir, filename);
+  }
+
+  /**
+   * Get path for failure screenshots (automatic on test failure)
+   */
+  getFailureScreenshotPath(filename) {
+    return path.join(this.failureDir, filename);
+  }
+
+  /**
+   * Get path for success screenshots (final state, etc.)
+   */
+  getSuccessScreenshotPath(filename) {
+    return path.join(this.successDir, filename);
+  }
+
+  /**
    * List all screenshots
    */
   listScreenshots() {
-    if (!fs.existsSync(this.screenshotsDir)) {
-      return [];
-    }
+    const allScreenshots = [];
     
-    const files = fs.readdirSync(this.screenshotsDir);
-    return files.filter(file => file.endsWith('.png'));
+    // Check each directory for screenshots
+    const directories = [this.screenshotsDir, this.successDir, this.failureDir, this.stepDir];
+    
+    directories.forEach(dir => {
+      if (fs.existsSync(dir)) {
+        const files = fs.readdirSync(dir);
+        const screenshots = files
+          .filter(file => file.endsWith('.png'))
+          .map(file => ({
+            filename: file,
+            path: path.join(dir, file),
+            type: path.basename(dir),
+            mtime: fs.statSync(path.join(dir, file)).mtime
+          }));
+        allScreenshots.push(...screenshots);
+      }
+    });
+    
+    return allScreenshots;
   }
 
   /**
@@ -93,12 +141,8 @@ export class ScreenshotManager {
       return;
     }
 
+    // Screenshots already have path and mtime from listScreenshots
     const sortedScreenshots = screenshots
-      .map(filename => ({
-        filename,
-        path: this.getScreenshotPath(filename),
-        mtime: fs.statSync(this.getScreenshotPath(filename)).mtime
-      }))
       .sort((a, b) => a.mtime - b.mtime);
 
     const screenshotsToRemove = sortedScreenshots.slice(0, screenshots.length - maxFiles);
@@ -106,6 +150,7 @@ export class ScreenshotManager {
     screenshotsToRemove.forEach(screenshot => {
       try {
         fs.unlinkSync(screenshot.path);
+        console.log(`Removed: ${screenshot.filename} [${screenshot.type}]`);
       } catch (error) {
         console.warn(`Could not remove screenshot ${screenshot.filename}: ${error.message}`);
       }
@@ -125,9 +170,12 @@ export class ScreenshotManager {
     }
 
     files.forEach(file => {
-      const filePath = path.join(this.screenshotsDir, file);
-      fs.unlinkSync(filePath);
-      console.log(`Removed: ${file}`);
+      try {
+        fs.unlinkSync(file.path);
+        console.log(`Removed: ${file.filename} [${file.type}]`);
+      } catch (error) {
+        console.warn(`Could not remove screenshot ${file.filename}: ${error.message}`);
+      }
     });
     
     console.log(`Force cleaned ${files.length} screenshots`);
@@ -146,11 +194,8 @@ export class ScreenshotManager {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysOld);
     
-    const filesToRemove = files.filter(file => {
-      const filePath = path.join(this.screenshotsDir, file);
-      const stats = fs.statSync(filePath);
-      return stats.mtime < cutoffDate;
-    });
+    // Files already have mtime from listScreenshots
+    const filesToRemove = files.filter(file => file.mtime < cutoffDate);
 
     if (filesToRemove.length === 0) {
       console.log(`No screenshots older than ${daysOld} days`);
@@ -158,9 +203,12 @@ export class ScreenshotManager {
     }
 
     filesToRemove.forEach(file => {
-      const filePath = path.join(this.screenshotsDir, file);
-      fs.unlinkSync(filePath);
-      console.log(`Removed old screenshot: ${file}`);
+      try {
+        fs.unlinkSync(file.path);
+        console.log(`Removed old screenshot: ${file.filename} [${file.type}]`);
+      } catch (error) {
+        console.warn(`Could not remove screenshot ${file.filename}: ${error.message}`);
+      }
     });
     
     console.log(`Cleaned ${filesToRemove.length} screenshots older than ${daysOld} days`);

@@ -13,6 +13,7 @@ artifacts/
 *.test.js
 *.spec.js
 test-*.yaml
+test-data/
 
 # Build artifacts
 dist/

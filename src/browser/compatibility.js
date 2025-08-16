@@ -50,6 +50,13 @@ export class PanopticalCompatibility {
   }
 
   /**
+   * Select option from dropdown (compatible with existing parser)
+   */
+  async selectOption(selector, value) {
+    return await this.browser.selectOption(selector, value);
+  }
+
+  /**
    * Wait for selector (compatible with existing parser)
    */
   async waitForSelector(selector, timeout) {
@@ -231,11 +238,11 @@ export class PanopticalCompatibility {
   /**
    * upload_file - Uploads and verifies file
    */
-  async uploadFile(fileInputSelector, filePath, successIndicator) {
+  async uploadFile(fileInputSelector, filePath, successIndicator, uploadButtonSelector = null) {
     if (!this.actions) {
       throw new Error('Browser not launched. Call launch() first.');
     }
-    return await this.actions.uploadFile(fileInputSelector, filePath, successIndicator);
+    return await this.actions.uploadFile(fileInputSelector, filePath, successIndicator, uploadButtonSelector);
   }
 
   /**

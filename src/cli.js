@@ -280,15 +280,17 @@ async function handleScreenshotsCommand(args) {
       console.log(chalk.blue('─'.repeat(50)));
       
       screenshots.forEach(screenshot => {
-        const filePath = screenshotManager.getScreenshotPath(screenshot);
-        const stats = fs.statSync(filePath);
-        const size = (stats.size / 1024).toFixed(1);
-        const date = stats.mtime.toLocaleDateString();
-        console.log(chalk.white(`${screenshot} (${size}KB, ${date})`));
+        const size = (screenshot.path ? fs.statSync(screenshot.path).size : 0) / 1024;
+        const date = screenshot.mtime ? screenshot.mtime.toLocaleDateString() : 'Unknown';
+        const type = screenshot.type ? `[${screenshot.type}]` : '';
+        console.log(chalk.white(`${screenshot.filename} ${type} (${size.toFixed(1)}KB, ${date})`));
       });
       
       console.log(chalk.blue('─'.repeat(50)));
-      console.log(chalk.cyan(`Directory: ${screenshotManager.screenshotsDir}`));
+      console.log(chalk.cyan(`Main directory: ${screenshotManager.screenshotsDir}`));
+      console.log(chalk.cyan(`Success screenshots: ${screenshotManager.successDir}`));
+      console.log(chalk.cyan(`Failure screenshots: ${screenshotManager.failureDir}`));
+      console.log(chalk.cyan(`Step screenshots: ${screenshotManager.stepDir}`));
       break;
       
     case 'clean':
