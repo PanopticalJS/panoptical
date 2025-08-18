@@ -4,6 +4,7 @@ import fs from 'fs';
 import { config } from './config.js';
 import { runTests } from './core/runner.js';
 import { analyzeFlakes } from './flakiness/analyzer.js';
+import { serveReports, showReportsHelp } from './reports/index.js';
 
 // Get version from package.json
 import { readFileSync } from 'fs';
@@ -35,6 +36,7 @@ function showHelp() {
   console.log(chalk.yellow('Commands:'));
   console.log(chalk.white('  run <path>       Run tests from directory or specific YAML files'));
   console.log(chalk.white('  analyze-flakes   Analyze test flakiness'));
+  console.log(chalk.white('  reports          Serve beautiful test reports dashboard'));
   console.log(chalk.white('  screenshots      List and manage screenshots'));
   console.log(chalk.white('  videos           List and manage failure videos'));
   console.log(chalk.white('  config           Manage configuration'));
@@ -79,6 +81,10 @@ async function main() {
         
       case 'analyze-flakes':
         await analyzeFlakes();
+        break;
+        
+      case 'reports':
+        await handleReportsCommand(args);
         break;
         
       case 'screenshots':
@@ -364,6 +370,48 @@ async function handleVideosCommand(args) {
     default:
       console.error(chalk.red(`Unknown videos command: ${subCommand}`));
       console.log(chalk.yellow('Available commands: list, clean, force-clean, clean-old'));
+  }
+}
+
+/**
+ * Handle reports commands
+ * @param {string[]} args - Command line arguments
+ */
+async function handleReportsCommand(args) {
+  if (args.includes('--help') || args.includes('-h')) {
+    showReportsHelp();
+    return;
+  }
+  
+  const options = {};
+  
+  // Parse port option
+  const portIndex = args.indexOf('--port');
+  if (portIndex !== -1 && args[portIndex + 1]) {
+    const port = parseInt(args[portIndex + 1]);
+    if (isNaN(port) || port < 1 || port > 65535) {
+      console.error(chalk.red('❌ Invalid port number. Must be between 1 and 65535.'));
+      return;
+    }
+    options.port = port;
+  }
+  
+  // Parse host option
+  const hostIndex = args.indexOf('--host');
+  if (hostIndex !== -1 && args[hostIndex + 1]) {
+    options.host = args[hostIndex + 1];
+  }
+  
+  // Parse open option
+  if (args.includes('--open')) {
+    options.open = true;
+  }
+  
+  try {
+    await serveReports(options);
+  } catch (error) {
+    console.error(chalk.red(`❌ Failed to start reports server: ${error.message}`));
+    process.exit(1);
   }
 }
 

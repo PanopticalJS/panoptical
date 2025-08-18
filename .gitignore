@@ -5,14 +5,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Test artifacts and screenshots
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.svg
+# Test artifacts
 artifacts/
-
 
 # Panoptical specific
 .panoptical/
