@@ -59,6 +59,13 @@ steps:
 
 Panoptical includes **powerful automation methods** that transform it from a basic tool into a **high-level testing framework**. These features make complex testing scenarios simple and enjoyable:
 
+### **Beautiful Test Reports**
+- **Web Dashboard** - Beautiful, interactive reports accessible via browser
+- **Real-time Updates** - Live data that refreshes automatically
+- **Interactive Charts** - Visual test results and performance trends
+- **Flakiness Analysis** - Built-in integration with test reliability metrics
+- **Team Collaboration** - Share dashboards with your development team
+
 ### **Core Browser Actions**
 - **`login`** - Smart authentication with automatic verification
 - **`logout`** - Clean session management with verification
@@ -380,6 +387,43 @@ panoptical videos clean-old 7
     }
   }
 }
+```
+
+### **7. Beautiful Test Reports**
+
+Panoptical provides a beautiful, interactive web dashboard for viewing test results:
+
+```bash
+# Start reports server
+panoptical reports
+
+# Start on custom port
+panoptical reports --port 3001
+
+# Start and auto-open browser
+panoptical reports --open
+
+# Bind to all interfaces (for team access)
+panoptical reports --host 0.0.0.0 --port 8080
+```
+
+**Reports Features:**
+- **Interactive Dashboard**: Beautiful statistics and charts
+- **Real-time Updates**: Data refreshes automatically every 30 seconds
+- **Test Details**: Click any test to see detailed run history
+- **Flakiness Analysis**: Built-in integration with reliability metrics
+- **Responsive Design**: Works perfectly on all devices
+- **Team Access**: Share dashboards with your development team
+
+**Available Endpoints:**
+- **Dashboard**: `http://localhost:3000` (or your custom port)
+- **API Data**: `http://localhost:3000/api/test-data`
+- **Test Details**: `http://localhost:3000/test/[test-name]`
+
+**NPM Scripts:**
+```bash
+npm run reports          # Start reports server
+npm run reports:open     # Start and open browser
 ```
 
 ## **Project Structure**

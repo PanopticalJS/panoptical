@@ -1,6 +1,6 @@
 {
   "name": "panoptical",
-  "version": "0.11.1",
+  "version": "1.0.0",
   "description": "A modern testing tool that makes Playwright easy to use with simple YAML syntax",
   "type": "module",
   "main": "src/cli.js",
@@ -50,6 +50,8 @@
     "screenshots:clean": "node src/cli.js screenshots clean",
     "screenshots:clean-all": "node src/cli.js screenshots force-clean",
     "analyze": "node src/cli.js analyze-flakes",
+    "reports": "node src/cli.js reports",
+    "reports:open": "node src/cli.js reports --open",
     "config": "node src/cli.js config show",
     "help": "node src/cli.js help",
     "prepublishOnly": "npm test",
@@ -58,6 +60,7 @@
   },
   "dependencies": {
     "chalk": "^5.5.0",
+    "express": "^4.21.2",
     "yaml": "^2.5.0"
   },
   "peerDependencies": {
