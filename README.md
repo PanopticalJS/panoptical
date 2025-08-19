@@ -72,6 +72,8 @@ Panoptical includes **powerful automation methods** that transform it from a bas
 - **`goto_with_auth`** - Navigate to protected pages with auth tokens
 - **`wait`** - Unified wait action for elements or text with configurable timeout
 - **`click_if_visible`** - Smart clicking that won't fail
+- **`fill`** - Fast form filling (instant text insertion)
+- **`type`** - Realistic typing simulation with configurable delays
 
 ### **UI Interaction Helpers**
 - **`select_from_dropdown`** - Human-friendly dropdown selection by text
@@ -166,10 +168,10 @@ steps:
   - goto: "https://example.com/login"
   - wait:
       selector: "#username"
-  - type:
+  - fill:
       selector: "#username"
       text: "testuser"
-  - type:
+  - fill:
       selector: "#password"
       text: "password123"
   - click: "#login-button"
@@ -250,6 +252,35 @@ steps:
       duration: 2000
 ```
 
+### **Fill vs Type Actions Example**
+
+```yaml
+test: 'Form Input Testing Demo'
+description: 'Demonstrates the difference between fill and type actions'
+steps:
+  - goto: 'https://example.com/form'
+  
+  # Fast form filling for efficiency
+  - fill:
+      selector: '#email'
+      text: 'user@example.com'
+  - fill:
+      selector: '#name'
+      text: 'John Doe'
+  
+  # Realistic typing simulation
+  - type:
+      selector: '#message'
+      text: 'This text is typed character by character'
+      delay: 150  # 150ms delay between characters
+  
+  # Even slower typing for dramatic effect
+  - type:
+      selector: '#notes'
+      text: 'Very slow typing simulation'
+      delay: 300  # 300ms delay between characters
+```
+
 ### **Run the Test**
 
 ```bash
@@ -282,9 +313,13 @@ panoptical run tests/example.yaml --headed
 
 # Interactions
 - click: "#button"
+- fill:
+    selector: "#input"
+    text: "Hello World"
 - type:
     selector: "#input"
     text: "Hello World"
+    delay: 100  # Optional: customize typing delay (default: 100ms)
 
 # Assertions
 - expect:
@@ -309,23 +344,76 @@ panoptical run tests/example.yaml --headed
 
 ### **3. Built-in Reliability**
 - **Auto-retries**: Automatic retry on navigation failures
-- **Auto-healing selectors**: Automatically find alternative selectors when elements fail
+- **Auto-healing selectors**: Automatically find alternative selectors when elements fail (experimental, disabled by default)
 - **Smart waiting**: Intelligent element detection with timeouts
 - **Error handling**: Clear, actionable error messages
 - **Failure screenshots**: Automatic screenshots on test failures
 
-### **4. Auto-healing Selectors**
+### **4. Fill vs Type Actions**
 
-Panoptical automatically tries to heal failing selectors using multiple strategies:
+Panoptical provides two different text input actions for different testing scenarios:
 
+**`fill` Action - Fast Form Filling:**
+```yaml
+- fill:
+    selector: '#email'
+    text: 'user@example.com'
+```
+- Uses `page.fill()` for instant text insertion
+- Perfect for form automation and fast testing
+- No delays between characters
+
+**`type` Action - Realistic Typing Simulation:**
+```yaml
+- type:
+    selector: '#email'
+    text: 'user@example.com'
+    delay: 100  # Optional: customize delay (default: 100ms)
+```
+- Uses `page.type()` with configurable delays
+- Simulates human typing behavior
+- Great for testing realistic user interactions
+- Can customize the delay between characters
+
+**Use Cases:**
+- **`fill`**: When you want fast, efficient form filling for bulk testing
+- **`type`**: When you want to test realistic user behavior, debug timing issues, or simulate human interaction patterns
+
+### **5. Auto-healing Selectors (Experimental)**
+
+Panoptical can automatically try to heal failing selectors using multiple strategies. **This feature is disabled by default** and should be used with caution.
+
+**Enable auto-healing:**
+```bash
+# Command line flag
+panoptical run tests --auto-healing
+
+# Environment variable
+export PANOPTICAL_AUTO_HEALING_ENABLED=true
+panoptical run tests
+
+# Configuration file (.panopticalrc.json)
+{
+  "autoHealing": {
+    "enabled": true,
+    "strategies": ["text", "semantic", "partial", "aria", "data", "class", "parent-child"],
+    "maxAttempts": 3
+  }
+}
+```
+
+**Healing Strategies:**
 - **Text content matching**: Find elements by their text
 - **Partial text matching**: Match elements with similar text
+- **Semantic matching**: Understand action context (click vs fill)
 - **ARIA attributes**: Use accessibility attributes as fallbacks
 - **Data attributes**: Leverage test-specific attributes
 - **Class patterns**: Try variations of CSS classes
 - **Parent-child relationships**: Find elements within containers
 
-### **5. Screenshot Management**
+**⚠️ Warning**: Auto-healing can make tests slower and sometimes mask real selector issues. Use for experimentation and debugging, not for production reliability.
+
+### **6. Screenshot Management**
 
 ```bash
 # List all screenshots
@@ -341,7 +429,7 @@ panoptical screenshots force-clean
 panoptical screenshots clean-old 7
 ```
 
-### **6. Video Recording on Failure**
+### **7. Video Recording on Failure**
 
 Panoptical can record videos during test execution and automatically save them only when tests fail:
 
@@ -389,7 +477,7 @@ panoptical videos clean-old 7
 }
 ```
 
-### **7. Beautiful Test Reports**
+### **8. Beautiful Test Reports**
 
 Panoptical provides a beautiful, interactive web dashboard for viewing test results:
 
@@ -513,10 +601,10 @@ steps:
   
   # Checkout process
   - click: "#checkout-button"
-  - type:
+  - fill:
       selector: "#email"
       text: "test@example.com"
-  - type:
+  - fill:
       selector: "#card-number"
       text: "4242424242424242"
   - click: "#complete-order"
@@ -557,6 +645,10 @@ panoptical run tests/smoke.yaml
 # Run with different browsers
 panoptical run tests --browser firefox
 panoptical run tests --browser webkit
+
+# Enable experimental features
+panoptical run tests --auto-healing  # Enable auto-healing
+panoptical run tests --video         # Enable video recording
 ```
 
 ## **Available Commands**

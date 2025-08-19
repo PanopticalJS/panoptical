@@ -150,9 +150,14 @@ export class PanopticalBrowser {
     try {
       await this.page.click(selector, options);
     } catch (error) {
+      // Check if auto-healing is enabled
+      if (!this.options.autoHealing?.enabled) {
+        throw error; // Auto-healing disabled, throw original error
+      }
+
       // Try auto-healing the selector
       console.log(`  Click failed, attempting auto-healing...`);
-      const healer = new SelectorHealer(this.page);
+      const healer = new SelectorHealer(this.page, this.options.autoHealing);
       const healedSelector = await healer.healSelector(selector, 'click');
       
       if (healedSelector) {
@@ -170,9 +175,9 @@ export class PanopticalBrowser {
   }
 
   /**
-   * Type text into an element with auto-healing
+   * Fill text into an element with auto-healing (fast form filling)
    */
-  async type(selector, text, options = {}) {
+  async fill(selector, text, options = {}) {
     if (!this.page) {
       throw new Error('Page not created. Call newPage() first.');
     }
@@ -180,15 +185,20 @@ export class PanopticalBrowser {
     try {
       await this.page.fill(selector, text, options);
     } catch (error) {
+      // Check if auto-healing is enabled
+      if (!this.options.autoHealing?.enabled) {
+        throw error; // Auto-healing disabled, throw original error
+      }
+
       // Try auto-healing the selector
-      console.log(`  Type failed, attempting auto-healing...`);
-      const healer = new SelectorHealer(this.page);
-      const healedSelector = await healer.healSelector(selector, 'type');
+      console.log(`  Fill failed, attempting auto-healing...`);
+      const healer = new SelectorHealer(this.page, this.options.autoHealing);
+      const healedSelector = await healer.healSelector(selector, 'fill');
       
       if (healedSelector) {
         try {
           await this.page.fill(healedSelector, text, options);
-          console.log(`  Type succeeded with healed selector: ${healedSelector}`);
+          console.log(`  Fill succeeded with healed selector: ${healedSelector}`);
         } catch (healedError) {
           console.error(`  Auto-healing failed: ${healedError.message}`);
           throw error; // Throw original error
@@ -200,9 +210,48 @@ export class PanopticalBrowser {
   }
 
   /**
+   * Type text into an element with realistic delays (slow typing simulation)
+   */
+  async type(selector, text, options = {}) {
+    if (!this.page) {
+      throw new Error('Page not created. Call newPage() first.');
+    }
+
+    const delay = options.delay || 100; // Default 100ms delay between characters
+
+    try {
+      await this.page.type(selector, text, { delay });
+    } catch (error) {
+      // Check if auto-healing is enabled
+      if (!this.options.autoHealing?.enabled) {
+        throw error; // Auto-healing disabled, throw original error
+      }
+
+      // Try auto-healing the selector
+      console.log(`  Type failed, attempting auto-healing...`);
+      const healer = new SelectorHealer(this.page, this.options.autoHealing);
+      const healedSelector = await healer.healSelector(selector, 'type');
+      
+      if (healedSelector) {
+        try {
+          await this.page.type(healedSelector, text, { delay });
+          console.log(`  Type succeeded with healed selector: ${healedSelector}`);
+        } catch (healedError) {
+          console.error(`  Auto-healing failed: ${healedError.message}`);
+          throw error; // Throw original error
+        }
+      } else {
+        throw error; // No healing possible, throw original error
+      }
+    }
+  }
+
+
+
+  /**
    * Select option from dropdown with auto-healing
    */
-  async selectOption(selector, value, options = {}) {
+    async selectOption(selector, value, options = {}) {
     if (!this.page) {
       throw new Error('Page not created. Call newPage() first.');
     }
@@ -210,9 +259,14 @@ export class PanopticalBrowser {
     try {
       await this.page.selectOption(selector, value, options);
     } catch (error) {
+      // Check if auto-healing is enabled
+      if (!this.options.autoHealing?.enabled) {
+        throw error; // Auto-healing disabled, throw original error
+      }
+
       // Try auto-healing the selector
       console.log(`  Select option failed, attempting auto-healing...`);
-      const healer = new SelectorHealer(this.page);
+      const healer = new SelectorHealer(this.page, this.options.autoHealing);
       const healedSelector = await healer.healSelector(selector, 'select');
       
       if (healedSelector) {
@@ -242,9 +296,14 @@ export class PanopticalBrowser {
     try {
       await this.page.waitForSelector(selector, { timeout: waitTimeout });
     } catch (error) {
+      // Check if auto-healing is enabled
+      if (!this.options.autoHealing?.enabled) {
+        throw error; // Auto-healing disabled, throw original error
+      }
+
       // Try auto-healing the selector
       console.log(`  Wait failed, attempting auto-healing...`);
-      const healer = new SelectorHealer(this.page);
+      const healer = new SelectorHealer(this.page, this.options.autoHealing);
       const healedSelector = await healer.healSelector(selector, 'wait');
       
       if (healedSelector) {

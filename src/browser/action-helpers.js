@@ -34,11 +34,11 @@ export class ActionHelpers {
       // Clear and fill username
       const page = this.getPage();
       await page.fill(usernameSelector, '');
-      await this.browser.type(usernameSelector, username);
+      await this.browser.fill(usernameSelector, username);
       
       // Clear and fill password
       await page.fill(passwordSelector, '');
-      await this.browser.type(passwordSelector, password);
+      await this.browser.fill(passwordSelector, password);
       
       // Submit the form
       if (submitSelector) {
@@ -761,7 +761,7 @@ export class ActionHelpers {
         
         // Fill the field
         await this.browser.waitForSelector(selector);
-        await this.browser.type(selector, randomValue);
+        await this.browser.fill(selector, randomValue);
       }
       console.log(chalk.green(`✓ Random form filling completed successfully`));
       return true;
@@ -1186,9 +1186,12 @@ export class ActionHelpers {
       } else {
         throw new Error('click action must specify either a string selector, text, or selector object');
       }
-    } else if (step.type) {
-      await this.browser.type(step.type.selector, step.type.text);
-    } else if (step.selectOption) {
+          } else if (step.fill) {
+        await this.browser.fill(step.fill.selector, step.fill.text);
+      } else if (step.type) {
+        const delay = step.type.delay || 100;
+        await this.browser.type(step.type.selector, step.type.text, { delay });
+      } else if (step.selectOption) {
       await this.browser.selectOption(step.selectOption.selector, step.selectOption.value);
     } else if (step.evaluate) {
       await this.browser.evaluate(step.evaluate.script, step.evaluate.selector);

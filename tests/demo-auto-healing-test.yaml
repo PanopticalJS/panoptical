@@ -4,12 +4,16 @@ steps:
   - goto: 'https://panoptical.dev/testing/test-page.html'
   - wait:
       selector: body
-  # This selector will fail but auto-healing should find the button by text
-  - click: 'Click Me!'
-  # This selector will fail but auto-healing should find the input by ID
-  - type:
-      selector: 'input'
+  
+  # Example 1: Partial text that needs fuzzy matching
+  # Selector 'Click' should heal to 'Click Me!' via fuzzy text matching
+  - click: 'Click'
+  
+  # Fill input to test the result
+  - fill:
+      selector: '#demo-input'
       text: 'Testing auto-healing'
+  
   - expect:
       selector: '#demo-output'
       text: 'Button clicked!'
