@@ -5,17 +5,37 @@
  */
 
 export class SelectorHealer {
-  constructor(page) {
+  constructor(page, config = {}) {
     this.page = page;
-    this.healingStrategies = [
-      this.tryTextContent,
-      this.tryPartialText,
-      this.tryAriaAttributes,
-      this.tryDataAttributes,
-      this.tryClassPatterns,
-      this.tryParentChild,
-      this.trySiblingElements
-    ];
+    this.config = {
+      enabled: true,
+      strategies: ['text', 'semantic', 'partial', 'aria', 'data', 'class', 'parent-child'],
+      maxAttempts: 3,
+      ...config
+    };
+    
+    // Build healing strategies based on configuration
+    this.healingStrategies = this.buildHealingStrategies();
+  }
+
+  /**
+   * Build healing strategies based on configuration
+   */
+  buildHealingStrategies() {
+    const strategyMap = {
+      'text': this.tryTextContent,
+      'semantic': this.trySemanticMatching,
+      'partial': this.tryPartialText,
+      'aria': this.tryAriaAttributes,
+      'data': this.tryDataAttributes,
+      'class': this.tryClassPatterns,
+      'parent-child': this.tryParentChild,
+      'sibling': this.trySiblingElements
+    };
+
+    return this.config.strategies
+      .map(strategy => strategyMap[strategy])
+      .filter(Boolean); // Remove undefined strategies
   }
 
   /**
@@ -44,30 +64,75 @@ export class SelectorHealer {
   }
 
   /**
-   * Strategy 1: Try text content matching
+   * Strategy 1: Try text content matching with common variations
    */
   async tryTextContent(selector, action) {
     // Extract text from selector (remove #, ., etc.)
     const textContent = selector.replace(/[#.\[\]=]/g, '').trim();
     if (textContent.length < 2) return null;
 
-    // Try exact text match
-    const textSelector = `text='${textContent}'`;
+    // Try exact text match first (correct Playwright syntax)
+    const textSelector = `text=${textContent}`;
     if (await this.isElementVisible(textSelector)) {
       return textSelector;
     }
 
-    // Try contains text
-    const containsSelector = `text*='${textContent}'`;
-    if (await this.isElementVisible(containsSelector)) {
-      return containsSelector;
+    // For click actions, try to find text that contains our search term
+    if (action === 'click') {
+      // Try common text variations that might contain our search term
+      const textVariations = [
+        `text=${textContent}!`,      // with exclamation
+        `text=${textContent}?`,      // with question mark
+        `text=${textContent} `,      // with trailing space
+        `text= ${textContent}`,      // with leading space
+        `text=${textContent}.`,      // with period
+        `text=${textContent}:`       // with colon
+      ];
+      
+      for (const variation of textVariations) {
+        if (await this.isElementVisible(variation)) {
+          return variation;
+        }
+      }
     }
 
     return null;
   }
 
   /**
-   * Strategy 2: Try partial text matching
+   * Strategy 2: Try semantic matching based on action type
+   */
+  async trySemanticMatching(selector, action) {
+    if (action === 'click') {
+      // Try to find any button element first
+      if (await this.isElementVisible('button')) {
+        return 'button';
+      }
+      
+      // Try to find any clickable element
+      const clickableSelectors = ['a', '[role="button"]', '[onclick]'];
+      for (const clickableSelector of clickableSelectors) {
+        if (await this.isElementVisible(clickableSelector)) {
+          return clickableSelector;
+        }
+      }
+    }
+    
+    if (action === 'fill' || action === 'type') {
+      // Try to find any input element
+      const inputSelectors = ['input', 'textarea', '[contenteditable]'];
+      for (const inputSelector of inputSelectors) {
+        if (await this.isElementVisible(inputSelector)) {
+          return inputSelector;
+        }
+      }
+    }
+    
+    return null;
+  }
+
+  /**
+   * Strategy 3: Try partial text matching
    */
   async tryPartialText(selector, action) {
     const textContent = selector.replace(/[#.\[\]=]/g, '').trim();

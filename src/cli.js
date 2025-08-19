@@ -49,6 +49,7 @@ function showHelp() {
   console.log(chalk.white('  --timeout <ms>   Default timeout in milliseconds (default: 30000)'));
   console.log(chalk.white('  --retries <num>  Number of retry attempts (default: 3)'));
   console.log(chalk.white('  --video          Enable video recording (saves on failure only)'));
+  console.log(chalk.white('  --auto-healing   Enable auto-healing for failed selectors (experimental)'));
   console.log(chalk.white('  --version, -v    Show version information'));
   console.log(chalk.white('  --help, -h       Show this help message\n'));
   
@@ -151,6 +152,8 @@ function parseRunOptions(args) {
       options.headless = true;
     } else if (arg === '--headed') {
       options.headless = false;
+    } else if (arg === '--auto-healing') {
+      options.autoHealing = { enabled: true };
     } else if (arg === '--timeout' && i + 1 < args.length) {
       options.timeout = parseInt(args[i + 1], 10);
       i++;
@@ -216,6 +219,10 @@ function handleConfigCommand(args) {
       console.log(chalk.white('    video.dir            - Directory for videos'));
       console.log(chalk.white('    video.onlyOnFailure  - Save videos only on failure (true/false)'));
       console.log(chalk.white('    video.size           - Video dimensions (width, height)'));
+      console.log(chalk.white('  autoHealing  - Auto-healing configuration'));
+      console.log(chalk.white('    autoHealing.enabled  - Enable auto-healing (true/false)'));
+      console.log(chalk.white('    autoHealing.strategies - Healing strategies to use'));
+      console.log(chalk.white('    autoHealing.maxAttempts - Maximum healing attempts'));
   }
 }
 

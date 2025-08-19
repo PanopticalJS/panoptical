@@ -211,11 +211,20 @@ async function runSteps(browser, steps, stepType, screenshotManager, testName) {
         }
       }
       
+      if (step.fill) {
+        await browser.waitForSelector(step.fill.selector);
+        await browser.fill(step.fill.selector, step.fill.text);
+        console.log(chalk.green(`✓ Filled `) + chalk.bold.green(`"${step.fill.text}"`) + chalk.green(` into `) + chalk.bold.green(`${step.fill.selector}`));
+      }
+
       if (step.type) {
         await browser.waitForSelector(step.type.selector);
-        await browser.type(step.type.selector, step.type.text);
-        console.log(chalk.green(`✓ Typed `) + chalk.bold.green(`"${step.type.text}"`) + chalk.green(` into `) + chalk.bold.green(`${step.type.selector}`));
+        const delay = step.type.delay || 100;
+        await browser.type(step.type.selector, step.type.text, { delay });
+        console.log(chalk.green(`✓ Typed `) + chalk.bold.green(`"${step.type.text}"`) + chalk.green(` into `) + chalk.bold.green(`${step.type.selector}`) + chalk.green(` with ${delay}ms delay`));
       }
+
+
       
       if (step.selectOption) {
         await browser.waitForSelector(step.selectOption.selector);

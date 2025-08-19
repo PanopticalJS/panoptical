@@ -22,6 +22,11 @@ export class Config {
       screenshotDir: 'artifacts/screenshots',
       videoDir: 'artifacts/videos',
       logLevel: 'info',
+      autoHealing: {
+        enabled: false,  // Disabled by default
+        strategies: ['text', 'semantic', 'partial', 'aria', 'data', 'class', 'parent-child'],
+        maxAttempts: 3
+      },
       video: {
         enabled: false,
         dir: 'artifacts/videos',
@@ -82,6 +87,17 @@ export class Config {
       config.video = config.video || {};
       config.video.onlyOnFailure = process.env.PANOPTICAL_VIDEO_ONLY_ON_FAILURE === 'true';
     }
+
+    // Auto-healing configuration environment variables
+    if (process.env.PANOPTICAL_AUTO_HEALING_ENABLED) {
+      config.autoHealing = config.autoHealing || {};
+      config.autoHealing.enabled = process.env.PANOPTICAL_AUTO_HEALING_ENABLED === 'true';
+    }
+    
+    if (process.env.PANOPTICAL_AUTO_HEALING_STRATEGIES) {
+      config.autoHealing = config.autoHealing || {};
+      config.autoHealing.strategies = process.env.PANOPTICAL_AUTO_HEALING_STRATEGIES.split(',');
+    }
     
     return config;
   }
@@ -130,6 +146,11 @@ export class Config {
       screenshotDir: 'artifacts/screenshots',
       videoDir: 'artifacts/videos',
       logLevel: 'info',
+      autoHealing: {
+        enabled: false,  // Set to true to enable auto-healing
+        strategies: ['text', 'semantic', 'partial', 'aria', 'data', 'class', 'parent-child'],
+        maxAttempts: 3
+      },
       video: {
         enabled: false,
         dir: 'artifacts/videos',

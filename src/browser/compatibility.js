@@ -45,9 +45,15 @@ export class PanopticalCompatibility {
   /**
    * Type text (compatible with existing parser)
    */
-  async type(selector, text) {
-    return await this.browser.type(selector, text);
+  async fill(selector, text) {
+    return await this.browser.fill(selector, text);
   }
+
+  async type(selector, text, options = {}) {
+    return await this.browser.type(selector, text, options);
+  }
+
+
 
   /**
    * Select option from dropdown (compatible with existing parser)

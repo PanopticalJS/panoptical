@@ -55,14 +55,14 @@ steps:
   # Fill Billing City
   - wait:
       selector: '#billing-city'
-  - type:
+  - fill:
       selector: '#billing-city'
       text: 'Los Angeles'
   
   # Fill BillingZIP Code
   - wait:
       selector: '#billing-postcode'
-  - type:
+  - fill:
       selector: '#billing-postcode'
       text: '96000'
   
