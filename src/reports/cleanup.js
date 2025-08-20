@@ -293,3 +293,53 @@ async function showUpdatedStatistics(runsData) {
   console.log(chalk.white(`  • Total runs: ${totalRuns}`));
   console.log(chalk.white(`  • Pass rate: ${passRate}%`));
 }
+
+/**
+ * Automatically maintain test run limits (called periodically or after test runs)
+ * @param {number} maxRuns - Maximum runs to keep per test (default: 50)
+ * @param {boolean} saveToFile - Whether to save the limited data back to files
+ */
+export async function maintainRunLimits(maxRuns = 50, saveToFile = true) {
+  try {
+    if (!fs.existsSync('.panoptical')) {
+      return;
+    }
+    
+    const runsData = loadJsonFile(RUNS_FILE, {});
+    const flakesData = loadJsonFile(FLAKES_FILE, {});
+    
+    let totalRunsRemoved = 0;
+    let testsTruncated = 0;
+    
+    for (const [testName, runs] of Object.entries(runsData)) {
+      if (runs.length > maxRuns) {
+        const runsToRemove = runs.length - maxRuns;
+        runsData[testName] = runs.slice(-maxRuns); // Keep newest runs
+        totalRunsRemoved += runsToRemove;
+        testsTruncated++;
+        
+        // Also update flakes data if it exists
+        if (flakesData[testName] && flakesData[testName].runs) {
+          const remainingRunTimestamps = new Set(runsData[testName].map(r => r.ts));
+          flakesData[testName].runs = flakesData[testName].runs.filter(r => 
+            remainingRunTimestamps.has(r.ts)
+          );
+        }
+      }
+    }
+    
+    if (totalRunsRemoved > 0) {
+      console.log(chalk.blue(`Auto-maintenance: Limited ${testsTruncated} tests to ${maxRuns} runs, removed ${totalRunsRemoved} old runs`));
+      
+      if (saveToFile) {
+        await saveJsonFile(RUNS_FILE, runsData);
+        await saveJsonFile(FLAKES_FILE, flakesData);
+      }
+    }
+    
+    return { totalRunsRemoved, testsTruncated };
+  } catch (error) {
+    console.warn(chalk.yellow(`Auto-maintenance failed: ${error.message}`));
+    return { totalRunsRemoved: 0, testsTruncated: 0 };
+  }
+}
