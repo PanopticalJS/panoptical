@@ -327,6 +327,40 @@ function generateDashboardHTML() {
             opacity: 0.9;
         }
         
+        .header-actions {
+            margin-top: 15px;
+        }
+        
+        .restart-button {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .restart-button:hover {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .restart-button:active {
+            transform: translateY(0);
+        }
+        
+        .restart-button i {
+            font-size: 0.85rem;
+        }
+        
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -506,9 +540,17 @@ function generateDashboardHTML() {
         .chart-title {
             font-size: 1rem;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             color: #e2e8f0;
             text-align: center;
+        }
+        
+        .chart-note {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-bottom: 10px;
+            font-style: italic;
         }
         
         .tests-section {
@@ -547,6 +589,57 @@ function generateDashboardHTML() {
             border-color: #3b82f6;
             box-shadow: 0 5px 15px rgba(59, 130, 246, 0.2);
             background: #475569;
+        }
+        
+        .search-container {
+            margin-bottom: 20px;
+        }
+        
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: #334155;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            padding: 0 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input-wrapper:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .search-icon {
+            color: #94a3b8;
+            margin-right: 12px;
+            font-size: 0.9rem;
+        }
+        
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #e2e8f0;
+            font-size: 1rem;
+            padding: 12px 0;
+            outline: none;
+        }
+        
+        .search-input::placeholder {
+            color: #94a3b8;
+        }
+        
+        .search-stats {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin-left: 15px;
+            white-space: nowrap;
+        }
+        
+        .test-card.hidden {
+            display: none;
         }
         
         .test-header {
@@ -655,6 +748,12 @@ function generateDashboardHTML() {
             <img src="/panoptical-logo.png" alt="Panoptical Logo" style="height: 45px; margin-bottom: 15px;">
             <h1>Panoptical Test Reports</h1>
             <p>Comprehensive Testing Dashboard</p>
+            <div class="header-actions">
+                <button id="restart-btn" class="restart-button" onclick="refreshData()" title="Refresh page and fetch latest test data">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh Data
+                </button>
+            </div>
         </div>
         
         <div id="loading" class="loading">
@@ -702,7 +801,8 @@ function generateDashboardHTML() {
                     <canvas id="resultsChart"></canvas>
                 </div>
                 <div class="chart-container">
-                    <div class="chart-title">Test Duration Trends</div>
+                    <div class="chart-title">Top 20 Longest-Running Tests</div>
+                    <div class="chart-note">Showing tests with longest execution times</div>
                     <canvas id="durationChart"></canvas>
                 </div>
             </div>
@@ -711,6 +811,15 @@ function generateDashboardHTML() {
                 <div class="section-title">
                     <i class="fas fa-list"></i>
                     Test Details
+                </div>
+                <div class="search-container">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="test-search" placeholder="Search tests by name..." class="search-input">
+                        <div class="search-stats">
+                            <span id="search-results-count">-</span> of <span id="total-tests-count">-</span> tests
+                        </div>
+                    </div>
                 </div>
                 <div id="test-grid" class="test-grid">
                     <!-- Test cards will be populated here -->
@@ -812,6 +921,9 @@ function generateDashboardHTML() {
             renderStats();
             renderCharts();
             renderTestGrid();
+            
+            // Setup search functionality after dashboard is rendered
+            setupSearch();
         }
         
         function renderStats() {
@@ -906,7 +1018,7 @@ function generateDashboardHTML() {
             const { runs } = testData;
             const testNames = Object.keys(runs);
             
-            // Get last 10 runs for each test
+            // Get the most recent run for each test
             const recentRuns = [];
             testNames.forEach(testName => {
                 const testRuns = runs[testName];
@@ -921,22 +1033,22 @@ function generateDashboardHTML() {
                 }
             });
             
-            // Sort by timestamp and take last 20
-            recentRuns.sort((a, b) => a.timestamp - b.timestamp);
-            const last20Runs = recentRuns.slice(-20);
+            // Sort by duration (longest first) and take top 20
+            recentRuns.sort((a, b) => b.duration - a.duration);
+            const top20LongestRuns = recentRuns.slice(0, 20);
             
             try {
                 durationChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: last20Runs.map(r => r.testName.substring(0, 12) + '...'),
+                        labels: top20LongestRuns.map(r => r.testName.length > 15 ? r.testName.substring(0, 15) + '...' : r.testName),
                         datasets: [{
                             label: 'Duration',
-                            data: last20Runs.map(r => r.duration),
-                            backgroundColor: last20Runs.map(r => 
-                                r.status === 'pass' ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)'
+                            data: top20LongestRuns.map(r => r.duration),
+                            backgroundColor: top20LongestRuns.map(r => 
+                                r.status === 'pass' ? 'rgba(16, 185, 68, 0.8)' : 'rgba(239, 68, 68, 0.8)'
                             ),
-                            borderColor: last20Runs.map(r => 
+                            borderColor: top20LongestRuns.map(r => 
                                 r.status === 'pass' ? '#10b981' : '#ef4444'
                             ),
                             borderWidth: 1,
@@ -1028,6 +1140,7 @@ function generateDashboardHTML() {
                 const testCard = document.createElement('div');
                 testCard.className = 'test-card';
                 testCard.onclick = () => showTestDetails(testName);
+                testCard.setAttribute('data-test-name', testName.toLowerCase());
                 
                 testCard.innerHTML = 
                     '<div class="test-header">' +
@@ -1054,6 +1167,9 @@ function generateDashboardHTML() {
                 
                 testGrid.appendChild(testCard);
             });
+            
+            // Update search stats
+            updateSearchStats();
         }
         
         function generateTimeline(runs) {
@@ -1124,8 +1240,77 @@ function generateDashboardHTML() {
             }
         }
         
+        // Refresh functionality
+        function refreshData() {
+            const button = document.getElementById('restart-btn');
+            
+            // Show loading state
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            button.disabled = true;
+            button.style.opacity = '0.7';
+            
+            // Reload the page after a short delay to show the loading state
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        }
+        
+        // Search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('test-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', filterTests);
+                searchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        searchInput.value = '';
+                        filterTests();
+                        searchInput.blur();
+                    }
+                });
+            }
+        }
+        
+        function filterTests() {
+            const searchTerm = document.getElementById('test-search').value.toLowerCase().trim();
+            const testCards = document.querySelectorAll('.test-card');
+            let visibleCount = 0;
+            
+            testCards.forEach(card => {
+                const testName = card.getAttribute('data-test-name');
+                if (searchTerm === '' || testName.includes(searchTerm)) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+            
+            updateSearchStats(visibleCount);
+        }
+        
+        function updateSearchStats(visibleCount = null) {
+            const totalTests = document.querySelectorAll('.test-card').length;
+            const visibleTests = visibleCount !== null ? visibleCount : totalTests;
+            
+            document.getElementById('total-tests-count').textContent = totalTests;
+            document.getElementById('search-results-count').textContent = visibleTests;
+            
+            // Update search stats color based on results
+            const searchStats = document.querySelector('.search-stats');
+            if (visibleTests === 0 && document.getElementById('test-search').value.trim() !== '') {
+                searchStats.style.color = '#ef4444'; // Red when no results
+            } else {
+                searchStats.style.color = '#94a3b8'; // Default color
+            }
+        }
+        
         // Load data when page loads
         loadTestData();
+        
+        // Setup search after data loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search will be set up after test data loads
+        });
         
         // Refresh data every 30 seconds
         setInterval(loadTestData, 30000);
