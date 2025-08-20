@@ -37,7 +37,10 @@
     "bdd",
     "cucumber-alternative"
   ],
-  "author": "Veljko Vujanovic",
+  "author": {
+    "name": "Veljko Vujanovic",
+    "url": "https://github.com/veljkho"
+  },
   "license": "MIT",
   "scripts": {
     "start": "node src/cli.js",
