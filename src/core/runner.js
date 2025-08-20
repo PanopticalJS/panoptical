@@ -83,14 +83,15 @@ export async function runTests(dir, options = {}) {
     } catch (err) {
       const duration = Date.now() - testStartTime;
       const errorMessage = err instanceof Error ? err.message : String(err);
-      await logRun(fileName, 'fail', duration, errorMessage);
+      const screenshotInfo = err.screenshotInfo || null;
+      await logRun(fileName, 'fail', duration, errorMessage, screenshotInfo);
       
       console.error(chalk.red(`Test: ${fileName} failed`));
       console.error(chalk.red(`${errorMessage}`));
       
       // Display screenshot and video info if available
       if (err.screenshotInfo) {
-        console.error(chalk.yellow(err.screenshotInfo));
+        console.error(chalk.yellow('Screenshot is saved to artifacts'));
       }
       if (err.videoInfo) {
         console.error(chalk.yellow(err.videoInfo));
