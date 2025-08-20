@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { cleanupReports } from './cleanup.js';
 import { createReportServer } from './server.js';
 
 export async function serveReports(options = {}) {
@@ -72,6 +73,32 @@ export async function serveReports(options = {}) {
   });
 }
 
+export async function handleReportsCleanup(args) {
+  const subCommand = args[2];
+  const force = args.includes('--force') || args.includes('--yes') || args.includes('-y');
+  
+  switch (subCommand) {
+    case 'orphaned':
+      await cleanupReports({ strategy: 'orphaned', force });
+      break;
+    case 'test':
+      const testName = args[3];
+      if (!testName) {
+        console.error(chalk.red('Error: Test name required. Usage: panoptical reports clean test <test-name>'));
+        process.exit(1);
+      }
+      await cleanupReports({ strategy: 'specific', testName, force });
+      break;
+    case 'all':
+      await cleanupReports({ strategy: 'all', force });
+      break;
+    case 'help':
+    default:
+      showReportsCleanupHelp();
+      break;
+  }
+}
+
 export function showReportsHelp() {
   console.log(chalk.blue('\nPanoptical Test Reports'));
   console.log(chalk.cyan('Beautiful web-based test reporting for QA engineers\n'));
@@ -97,4 +124,35 @@ export function showReportsHelp() {
   console.log(chalk.white('  Flakiness analysis integration'));
   console.log(chalk.white('  Responsive design for all devices'));
   console.log(chalk.white('  Real-time data updates'));
+  console.log(chalk.white('  Test data cleanup and management'));
+}
+
+function showReportsCleanupHelp() {
+  console.log(chalk.blue('\nPanoptical Test Reports Cleanup'));
+  console.log(chalk.cyan('Clean up test reports and remove outdated data\n'));
+  
+  console.log(chalk.yellow('Usage:'));
+  console.log(chalk.white('  panoptical reports clean <command> [options]\n'));
+  
+  console.log(chalk.yellow('Commands:'));
+  console.log(chalk.white('  orphaned          Remove tests that no longer exist as YAML files'));
+  console.log(chalk.white('  test <name>       Remove specific test from reports'));
+  console.log(chalk.white('  all               Remove all test data (WARNING: destructive)'));
+  console.log(chalk.white('  help              Show this help message\n'));
+  
+  console.log(chalk.yellow('Options:'));
+  console.log(chalk.white('  --force, --yes, -y    Skip confirmation prompts\n'));
+  
+  console.log(chalk.yellow('Examples:'));
+  console.log(chalk.white('  panoptical reports clean orphaned              # Remove orphaned tests'));
+  console.log(chalk.white('  panoptical reports clean orphaned --force      # Remove without prompts'));
+  console.log(chalk.white('  panoptical reports clean test login.yaml       # Remove specific test'));
+  console.log(chalk.white('  panoptical reports clean test login.yaml --yes # Remove without prompts'));
+  console.log(chalk.white('  panoptical reports clean all                   # Remove all test data\n'));
+  
+  console.log(chalk.yellow('Notes:'));
+  console.log(chalk.white('  • Cleanup affects both runs.json and flakes.json'));
+  console.log(chalk.white('  • Statistics will be recalculated after cleanup'));
+  console.log(chalk.white('  • Use with caution - deleted data cannot be recovered'));
+  console.log(chalk.white('  • Use --force to skip confirmation prompts (useful for scripts)'));
 }
