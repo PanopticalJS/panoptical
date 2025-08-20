@@ -54,6 +54,7 @@ steps:
 - **Built-in reliability** - Auto-retries, failure screenshots
 - **Playwright's power** - All the browser automation capabilities
 - **Advanced Features** - High-level automation methods that make testing delightful
+- **Test Report Management** - Clean up and organize test data automatically
 
 ## **Advanced Features That Make Testing Delightful**
 
@@ -65,6 +66,7 @@ Panoptical includes **powerful automation methods** that transform it from a bas
 - **Interactive Charts** - Visual test results and performance trends
 - **Flakiness Analysis** - Built-in integration with test reliability metrics
 - **Team Collaboration** - Share dashboards with your development team
+- **Test Data Cleanup** - Remove orphaned tests and manage report data
 
 ### **Core Browser Actions**
 - **`login`** - Smart authentication with automatic verification
@@ -503,6 +505,41 @@ panoptical reports --host 0.0.0.0 --port 8080
 - **Responsive Design**: Works perfectly on all devices
 - **Team Access**: Share dashboards with your development team
 
+#### **Test Report Cleanup**
+
+Manage and clean up test data to keep your reports organized:
+
+```bash
+# Remove orphaned tests (tests that no longer exist as YAML files)
+panoptical reports clean orphaned
+
+# Remove specific test and all its data
+panoptical reports clean test <test-name>
+
+# Remove all test data (WARNING: destructive)
+panoptical reports clean all
+
+# Skip confirmation prompts (useful for scripts)
+panoptical reports clean orphaned --force
+panoptical reports clean orphaned --yes
+panoptical reports clean orphaned -y
+```
+
+**Cleanup Features:**
+- **Orphaned Test Detection**: Automatically finds tests without YAML files
+- **Recursive Directory Search**: Searches through subdirectories like `tests/demo-tests/`
+- **Safe Operations**: Interactive confirmation prompts (can be skipped with force flags)
+- **Data Consistency**: Updates both `runs.json` and `flakes.json`
+- **Statistics Recalculation**: Automatically updates dashboard statistics after cleanup
+- **Script-Friendly**: Force flags for automation and CI/CD pipelines
+
+**When to Use Cleanup:**
+- **Test Refactoring**: After renaming or moving test files
+- **Project Cleanup**: Remove old test data during development
+- **CI/CD Pipelines**: Automated cleanup with `--force` flag
+- **Team Collaboration**: Keep reports focused on current tests
+- **Performance**: Remove outdated data to improve dashboard speed
+
 **Available Endpoints:**
 - **Dashboard**: `http://localhost:3000` (or your custom port)
 - **API Data**: `http://localhost:3000/api/test-data`
@@ -668,6 +705,13 @@ panoptical videos list
 panoptical videos clean
 panoptical videos force-clean
 panoptical videos clean-old <days>
+
+# Reports and cleanup
+panoptical reports                    # Start reports server
+panoptical reports clean orphaned     # Remove orphaned tests
+panoptical reports clean test <name>  # Remove specific test
+panoptical reports clean all          # Remove all test data
+panoptical reports clean orphaned --force  # Skip prompts
 
 # Configuration
 panoptical config show

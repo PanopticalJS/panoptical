@@ -54,10 +54,16 @@ function showHelp() {
   console.log(chalk.white('  --help, -h       Show this help message\n'));
   
   console.log(chalk.yellow('Examples:'));
-  console.log(chalk.white('  panoptical run tests                           # Run all tests in tests/ directory'));
-  console.log(chalk.white('  panoptical run login.yaml                      # Run single test file'));
-  console.log(chalk.white('  panoptical run tests --video                   # Run with video recording'));
-  console.log(chalk.white('  panoptical run tests --headed --browser firefox # Run with options\n'));
+  console.log(chalk.white('  panoptical run tests                             # Run all tests in tests/ directory'));
+  console.log(chalk.white('  panoptical run login.yaml                        # Run single test file'));
+  console.log(chalk.white('  panoptical run tests --video                     # Run with video recording'));
+  console.log(chalk.white('  panoptical run tests --headed --browser firefox  # Run with options\n'));
+  
+  console.log(chalk.yellow('Report Management:'));
+  console.log(chalk.white('  panoptical reports clean orphaned                # Remove orphaned test data'));
+  console.log(chalk.white('  panoptical reports clean test <name>             # Remove specific test data'));
+  console.log(chalk.white('  panoptical reports clean all                     # Remove all test data'));
+  console.log(chalk.white('  panoptical reports clean orphaned --force        # Remove without prompts\n'));
   
   console.log(chalk.yellow('Features:'));
   console.log(chalk.white('  Simple YAML test syntax'));
@@ -66,6 +72,7 @@ function showHelp() {
   console.log(chalk.white('  Playwright power made easy'));
   console.log(chalk.white('  Built-in reliability features'));
   console.log(chalk.white('  Video recording on failure'));
+  console.log(chalk.white('  Test report cleanup and management'));
 }
 
 async function main() {
@@ -387,6 +394,13 @@ async function handleVideosCommand(args) {
 async function handleReportsCommand(args) {
   if (args.includes('--help') || args.includes('-h')) {
     showReportsHelp();
+    return;
+  }
+  
+  // Check for cleanup subcommand
+  if (args[1] === 'clean') {
+    const { handleReportsCleanup } = await import('./reports/index.js');
+    await handleReportsCleanup(args);
     return;
   }
   
