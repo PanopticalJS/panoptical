@@ -411,7 +411,7 @@ panoptical run tests
 - **Class patterns**: Try variations of CSS classes
 - **Parent-child relationships**: Find elements within containers
 
-**⚠️ Warning**: Auto-healing can make tests slower and sometimes mask real selector issues. Use for experimentation and debugging, not for production reliability.
+**Warning**: Auto-healing can make tests slower and sometimes mask real selector issues. Use for experimentation and debugging, not for production reliability.
 
 ### **6. Screenshot Management**
 
@@ -716,4 +716,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Panoptical** - Playwright made simple with YAML. 🚀
 
-**📚 [Full Documentation](https://panoptical.dev)** | **🐛 [Report Issues](https://github.com/PanopticalJS/panoptical/issues)** | **💬 [Discussions](https://github.com/PanopticalJS/panoptical/discussions)**
+**[Full Documentation](https://panoptical.dev)** | **[Report Issues](https://github.com/PanopticalJS/panoptical/issues)** | **[Discussions](https://github.com/PanopticalJS/panoptical/discussions)**
