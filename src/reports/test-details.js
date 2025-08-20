@@ -148,9 +148,9 @@ export function generateTestDetailsHTML(testName, testData) {
         .chart-container {
             background: #1e293b;
             border-radius: 12px;
-            padding: 20px;
+            padding: 30px 0px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            height: 320px;
+            height: 400px;
             border: 1px solid #334155;
             display: flex;
             flex-direction: column;
@@ -370,12 +370,12 @@ export function generateTestDetailsHTML(testName, testData) {
         <div class="charts-section">
             <div class="chart-container">
                 <div class="chart-title">Success Rate Over Time</div>
-                <div class="chart-note">Showing last 20 runs for optimal visualization</div>
+                <div class="chart-note">Showing last 20 runs: 20 (oldest) to 1 (newest)</div>
                 <canvas id="successChart"></canvas>
             </div>
             <div class="chart-container">
                 <div class="chart-title">Duration Trends</div>
-                <div class="chart-note">Showing last 20 runs for optimal visualization</div>
+                <div class="chart-note">Showing last 20 runs: 20 (oldest) to 1 (newest)</div>
                 <canvas id="durationChart"></canvas>
             </div>
         </div>
@@ -390,6 +390,7 @@ export function generateTestDetailsHTML(testName, testData) {
                 <thead>
                     <tr>
                         <th>Run #</th>
+                        <th>When</th>
                         <th>Status</th>
                         <th>Duration</th>
                         <th>Timestamp</th>
@@ -436,10 +437,10 @@ export function generateTestDetailsHTML(testName, testData) {
             const ctx = document.getElementById('successChart').getContext('2d');
             const chartRuns = ${JSON.stringify(testData.chartRuns || [])};
             
-            // Sort runs by timestamp (oldest first) for the chart to show progression
+            // Sort runs by timestamp (oldest first) for chart progression
             const sortedRuns = [...chartRuns].sort((a, b) => a.ts - b.ts);
             
-            const labels = sortedRuns.map((_, index) => \`Run \${index + 1}\`);
+            const labels = sortedRuns.map((run, index) => 20 - index); // 20 (oldest) to 1 (newest)
             const data = sortedRuns.map(run => run.status === 'pass' ? 1 : 0);
             
             new Chart(ctx, {
@@ -494,6 +495,17 @@ export function generateTestDetailsHTML(testName, testData) {
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const run = sortedRuns[context[0].dataIndex];
+                                    return \`Run \${20 - context[0].dataIndex} (\${run.relativeTime})\`;
+                                },
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + (context.parsed.y === 1 ? 'Pass' : 'Fail');
+                                }
+                            }
                         }
                     }
                 }
@@ -504,10 +516,10 @@ export function generateTestDetailsHTML(testName, testData) {
             const ctx = document.getElementById('durationChart').getContext('2d');
             const chartRuns = ${JSON.stringify(testData.chartRuns || [])};
             
-            // Sort runs by timestamp (newest first) for the chart
-            const sortedRuns = [...chartRuns].sort((a, b) => b.ts - a.ts);
+            // Sort runs by timestamp (oldest first) for chart progression
+            const sortedRuns = [...chartRuns].sort((a, b) => a.ts - b.ts);
             
-            const labels = sortedRuns.map((_, index) => \`Run \${index + 1}\`);
+            const labels = sortedRuns.map((run, index) => 20 - index); // 20 (oldest) to 1 (newest)
             const data = sortedRuns.map(run => run.duration);
             const colors = sortedRuns.map(run => run.status === 'pass' ? '#10b981' : '#ef4444');
             
@@ -572,6 +584,10 @@ export function generateTestDetailsHTML(testName, testData) {
                         },
                         tooltip: {
                             callbacks: {
+                                title: function(context) {
+                                    const run = sortedRuns[context[0].dataIndex];
+                                    return \`Run \${20 - context[0].dataIndex} (\${run.relativeTime})\`;
+                                },
                                 label: function(context) {
                                     const value = context.parsed.y;
                                     return 'Duration: ' + formatDuration(value);
@@ -599,7 +615,7 @@ export function generateTestDetailsHTML(testName, testData) {
 
 function generateRunsTableRows(runs) {
   if (runs.length === 0) {
-    return '<tr><td colspan="5" style="text-align: center; color: #94a3b8;">No test runs found</td></tr>';
+    return '<tr><td colspan="6" style="text-align: center; color: #94a3b8;">No test runs found</td></tr>';
   }
   
   // Sort runs by timestamp (newest first) and reverse the array to show latest first
@@ -611,30 +627,21 @@ function generateRunsTableRows(runs) {
     const statusText = run.status === 'pass' ? 'Pass' : 'Fail';
     const timestamp = new Date(run.ts).toLocaleString();
     
+    // Use the relativeTime that's already calculated by the server
+    const relativeTime = run.relativeTime;
+    
     let errorRow = '';
     if (run.error) {
-      errorRow = `
-        <tr>
-          <td colspan="5">
-            <div class="error-details" id="error-${runNumber}">
-              <strong>Error:</strong> ${run.error}
-            </div>
-          </td>
-        </tr>
-      `;
+      errorRow = '<tr><td colspan="6"><div class="error-details" id="error-' + runNumber + '"><strong>Error:</strong> ' + run.error + '</div></td></tr>';
     }
     
-    return `
-      <tr>
-        <td><strong>${runNumber}</strong></td>
-        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-        <td class="duration-cell">${run.duration < 1000 ? run.duration + 'ms' : Math.floor(run.duration / 1000) + 's'}</td>
-        <td class="timestamp-cell">${timestamp}</td>
-        <td>
-          ${run.error ? `<button onclick="toggleErrorDetails('${runNumber}')" style="background: #475569; border: 1px solid #64748b; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.875rem; color: #e2e8f0;">Show Error</button>` : '-'}
-        </td>
-      </tr>
-      ${errorRow}
-    `;
+    return '<tr>' +
+      '<td><strong>' + runNumber + '</strong></td>' +
+      '<td><strong>' + relativeTime + '</strong></td>' +
+      '<td><span class="status-badge ' + statusClass + '">' + statusText + '</span></td>' +
+      '<td class="duration-cell">' + (run.duration < 1000 ? run.duration + 'ms' : Math.floor(run.duration / 1000) + 's') + '</td>' +
+      '<td class="timestamp-cell">' + timestamp + '</td>' +
+      '<td>' + (run.error ? '<button onclick="toggleErrorDetails(\'' + runNumber + '\')" style="background: #475569; border: 1px solid #64748b; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.875rem; color: #e2e8f0;">Show Error</button>' : '-') + '</td>' +
+      '</tr>' + errorRow;
   }).join('');
 }

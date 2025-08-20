@@ -34,9 +34,19 @@ export function createReportServer(port = 3000) {
       const limitedRunsData = limitTestRuns(runsData, 50);
       const chartData = getChartData(limitedRunsData, 20);
       
+      // Add relative time data for charts
+      const chartDataWithTime = {};
+      for (const [testName, runs] of Object.entries(chartData)) {
+        chartDataWithTime[testName] = runs.map((run, index) => ({
+          ...run,
+          chartIndex: index + 1, // Simple 1,2,3... numbering for charts
+          relativeTime: getRelativeTime(run.ts)
+        }));
+      }
+      
       res.json({
         runs: limitedRunsData,
-        chartData: chartData, // Separate data for charts
+        chartData: chartDataWithTime, // Enhanced data for charts
         flakes: flakesData,
         timestamp: Date.now()
       });
@@ -78,14 +88,23 @@ export function createReportServer(port = 3000) {
       const limitedRunsData = limitTestRuns(runsData, 50);
       const testRuns = limitedRunsData[testName] || [];
       
+      // Add relative time to all runs for the history table
+      const runsWithTime = testRuns.map(run => ({
+        ...run,
+        relativeTime: getRelativeTime(run.ts)
+      }));
+      
       // For charts, use only the last 20 runs for better visualization
-      const chartRuns = testRuns.slice(-20);
+      const chartRuns = runsWithTime.slice(-20).map((run, index) => ({
+        ...run,
+        chartIndex: index + 1, // Simple 1,2,3... numbering for charts
+      }));
       
       const meta = readTestMeta(testName);
       const testData = {
         testName,
-        runs: testRuns,        // Full data for summary and details
-        chartRuns: chartRuns,  // Limited data for charts
+        runs: runsWithTime,    // Full data with relative time for summary and details
+        chartRuns: chartRuns,  // Limited data for charts with enhanced info
         summary: generateTestSummary(testRuns),
         meta
       };
@@ -144,6 +163,27 @@ function getChartData(runsData, maxChartRuns = 20) {
   }
   
   return chartData;
+}
+
+// Convert timestamp to human-readable relative time
+function getRelativeTime(timestamp) {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const minutes = Math.floor(diff / (1000 * 60));
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const months = Math.floor(diff / (1000 * 60 * 60 * 24 * 30));
+  
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes} min${minutes === 1 ? '' : 's'} ago`;
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  if (days < 30) return `${days} day${days === 1 ? '' : 's'} ago`;
+  if (months < 12) return `${months} month${months === 1 ? '' : 's'} ago`;
+  
+  // Fallback to date for runs older than 30 days
+  const date = new Date(timestamp);
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${monthNames[date.getMonth()]} ${date.getDate()}`;
 }
 
 // Automatically enforce test run limits and save the limited data back to files
