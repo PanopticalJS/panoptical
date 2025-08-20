@@ -171,6 +171,14 @@ export function generateTestDetailsHTML(testName, testData) {
             z-index: 10;
         }
         
+        .chart-note {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+        
         .runs-section {
             background: #1e293b;
             border-radius: 12px;
@@ -187,6 +195,14 @@ export function generateTestDetailsHTML(testName, testData) {
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+        
+        .section-subtitle {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            font-weight: 400;
+            margin-top: 5px;
+            margin-left: 30px;
         }
         
         .runs-table {
@@ -354,10 +370,12 @@ export function generateTestDetailsHTML(testName, testData) {
         <div class="charts-section">
             <div class="chart-container">
                 <div class="chart-title">Success Rate Over Time</div>
+                <div class="chart-note">Showing last 20 runs for optimal visualization</div>
                 <canvas id="successChart"></canvas>
             </div>
             <div class="chart-container">
                 <div class="chart-title">Duration Trends</div>
+                <div class="chart-note">Showing last 20 runs for optimal visualization</div>
                 <canvas id="durationChart"></canvas>
             </div>
         </div>
@@ -366,6 +384,7 @@ export function generateTestDetailsHTML(testName, testData) {
             <div class="section-title">
                 <i class="fas fa-history"></i>
                 Test Run History
+                <div class="section-subtitle">Showing all ${runs.length} test runs. System automatically keeps last 50 runs per test.</div>
             </div>
             <table class="runs-table">
                 <thead>
@@ -415,10 +434,10 @@ export function generateTestDetailsHTML(testName, testData) {
         
         function renderSuccessChart() {
             const ctx = document.getElementById('successChart').getContext('2d');
-            const runs = ${JSON.stringify(runs)};
+            const chartRuns = ${JSON.stringify(testData.chartRuns || [])};
             
             // Sort runs by timestamp (oldest first) for the chart to show progression
-            const sortedRuns = [...runs].sort((a, b) => a.ts - b.ts);
+            const sortedRuns = [...chartRuns].sort((a, b) => a.ts - b.ts);
             
             const labels = sortedRuns.map((_, index) => \`Run \${index + 1}\`);
             const data = sortedRuns.map(run => run.status === 'pass' ? 1 : 0);
@@ -483,10 +502,10 @@ export function generateTestDetailsHTML(testName, testData) {
         
         function renderDurationChart() {
             const ctx = document.getElementById('durationChart').getContext('2d');
-            const runs = ${JSON.stringify(runs)};
+            const chartRuns = ${JSON.stringify(testData.chartRuns || [])};
             
             // Sort runs by timestamp (newest first) for the chart
-            const sortedRuns = [...runs].sort((a, b) => b.ts - a.ts);
+            const sortedRuns = [...chartRuns].sort((a, b) => b.ts - a.ts);
             
             const labels = sortedRuns.map((_, index) => \`Run \${index + 1}\`);
             const data = sortedRuns.map(run => run.duration);

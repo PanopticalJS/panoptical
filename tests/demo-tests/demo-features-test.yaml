@@ -1,5 +1,5 @@
-test: "Essential Panoptical Features Demo"
-description: "Focused test demonstrating the most important Panoptical automation features"
+test: Essential Panoptical Features Demo
+description: Focused test demonstrating the most important Panoptical automation features
 browser: chromium
 headless: false
 timeout: 30000

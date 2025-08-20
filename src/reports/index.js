@@ -89,6 +89,11 @@ export async function handleReportsCleanup(args) {
       }
       await cleanupReports({ strategy: 'specific', testName, force });
       break;
+
+    case 'auto-maintain':
+      const { maintainRunLimits } = await import('./cleanup.js');
+      await maintainRunLimits(50, true);
+      break;
     case 'all':
       await cleanupReports({ strategy: 'all', force });
       break;
@@ -137,6 +142,7 @@ function showReportsCleanupHelp() {
   console.log(chalk.yellow('Commands:'));
   console.log(chalk.white('  orphaned          Remove tests that no longer exist as YAML files'));
   console.log(chalk.white('  test <name>       Remove specific test from reports'));
+  console.log(chalk.white('  auto-maintain     Automatically limit runs to 50 per test'));
   console.log(chalk.white('  all               Remove all test data (WARNING: destructive)'));
   console.log(chalk.white('  help              Show this help message\n'));
   
@@ -148,6 +154,7 @@ function showReportsCleanupHelp() {
   console.log(chalk.white('  panoptical reports clean orphaned --force      # Remove without prompts'));
   console.log(chalk.white('  panoptical reports clean test login.yaml       # Remove specific test'));
   console.log(chalk.white('  panoptical reports clean test login.yaml --yes # Remove without prompts'));
+  console.log(chalk.white('  panoptical reports clean auto-maintain         # Auto-limit to 50 runs per test'));
   console.log(chalk.white('  panoptical reports clean all                   # Remove all test data\n'));
   
   console.log(chalk.yellow('Notes:'));
@@ -155,4 +162,6 @@ function showReportsCleanupHelp() {
   console.log(chalk.white('  • Statistics will be recalculated after cleanup'));
   console.log(chalk.white('  • Use with caution - deleted data cannot be recovered'));
   console.log(chalk.white('  • Use --force to skip confirmation prompts (useful for scripts)'));
+  console.log(chalk.white('  • System automatically enforces 50-run limit per test'));
+  console.log(chalk.white('  • Charts automatically show only last 20 runs for optimal visualization'));
 }

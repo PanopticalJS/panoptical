@@ -10,33 +10,33 @@ const __dirname = path.dirname(__filename);
 export function createReportServer(port = 3000) {
   const app = express();
   
-  // Serve static files from the reports directory
+  enforceTestRunLimits();
+  
   app.use('/static', express.static(path.join(__dirname, 'static')));
   
-  // Serve the Panoptical logo
   app.get('/panoptical-logo.png', (req, res) => {
     res.sendFile(path.join(__dirname, 'panoptical-logo.png'));
   });
   
-  // Main dashboard route
   app.get('/', (req, res) => {
     const html = generateDashboardHTML();
     res.send(html);
   });
   
-  // API endpoint for test data
   app.get('/api/test-data', (req, res) => {
     try {
       const runsData = fs.existsSync('.panoptical/runs.json') 
         ? JSON.parse(fs.readFileSync('.panoptical/runs.json', 'utf8'))
         : {};
-      
       const flakesData = fs.existsSync('.panoptical/flakes.json')
         ? JSON.parse(fs.readFileSync('.panoptical/flakes.json', 'utf8'))
         : {};
+      const limitedRunsData = limitTestRuns(runsData, 50);
+      const chartData = getChartData(limitedRunsData, 20);
       
       res.json({
-        runs: runsData,
+        runs: limitedRunsData,
+        chartData: chartData, // Separate data for charts
         flakes: flakesData,
         timestamp: Date.now()
       });
@@ -45,7 +45,6 @@ export function createReportServer(port = 3000) {
     }
   });
   
-  // API endpoint for individual test details
   app.get('/api/test/:testName', (req, res) => {
     try {
       const { testName } = req.params;
@@ -53,7 +52,9 @@ export function createReportServer(port = 3000) {
         ? JSON.parse(fs.readFileSync('.panoptical/runs.json', 'utf8'))
         : {};
       
-      const testRuns = runsData[testName] || [];
+      const limitedRunsData = limitTestRuns(runsData, 50);
+      const testRuns = limitedRunsData[testName] || [];
+      
       const meta = readTestMeta(testName);
       res.json({
         testName,
@@ -66,7 +67,6 @@ export function createReportServer(port = 3000) {
     }
   });
   
-  // HTML route for individual test details
   app.get('/test/:testName', (req, res) => {
     try {
       const { testName } = req.params;
@@ -74,11 +74,18 @@ export function createReportServer(port = 3000) {
         ? JSON.parse(fs.readFileSync('.panoptical/runs.json', 'utf8'))
         : {};
       
-      const testRuns = runsData[testName] || [];
+      // Auto-limit test runs to 50 for storage/performance
+      const limitedRunsData = limitTestRuns(runsData, 50);
+      const testRuns = limitedRunsData[testName] || [];
+      
+      // For charts, use only the last 20 runs for better visualization
+      const chartRuns = testRuns.slice(-20);
+      
       const meta = readTestMeta(testName);
       const testData = {
         testName,
-        runs: testRuns,
+        runs: testRuns,        // Full data for summary and details
+        chartRuns: chartRuns,  // Limited data for charts
         summary: generateTestSummary(testRuns),
         meta
       };
@@ -104,24 +111,124 @@ function generateTestSummary(runs) {
   return { total, passed, failed, passRate };
 }
 
-// Read test metadata (name, description, file path) from YAML in tests/ directory
+// Automatically limit test runs to keep only the most recent ones (enforced limit)
+function limitTestRuns(runsData, maxRuns = 50) {
+  const limitedData = {};
+  let totalRunsRemoved = 0;
+  
+  for (const [testName, runs] of Object.entries(runsData)) {
+    if (runs.length > maxRuns) {
+      // Keep only the most recent runs (newest first, so slice from end)
+      limitedData[testName] = runs.slice(-maxRuns);
+      totalRunsRemoved += runs.length - maxRuns;
+    } else {
+      limitedData[testName] = runs;
+    }
+  }
+  
+  // Always enforce the limit - this is default behavior
+  if (totalRunsRemoved > 0) {
+    console.log(`Auto-enforced limit: Kept last ${maxRuns} runs per test, removed ${totalRunsRemoved} old runs`);
+  }
+  
+  return limitedData;
+}
+
+// Get limited test runs for charts (enforced limit for better visualization)
+function getChartData(runsData, maxChartRuns = 20) {
+  const chartData = {};
+  
+  for (const [testName, runs] of Object.entries(runsData)) {
+    // Charts automatically show only the last 20 runs for better readability
+    chartData[testName] = runs.slice(-maxChartRuns);
+  }
+  
+  return chartData;
+}
+
+// Automatically enforce test run limits and save the limited data back to files
+function enforceTestRunLimits() {
+  try {
+    if (!fs.existsSync('.panoptical/runs.json')) {
+      return; // No data to enforce limits on
+    }
+    
+    const runsData = JSON.parse(fs.readFileSync('.panoptical/runs.json', 'utf8'));
+    const flakesData = fs.existsSync('.panoptical/flakes.json') 
+      ? JSON.parse(fs.readFileSync('.panoptical/flakes.json', 'utf8'))
+      : {};
+    
+    let totalRunsRemoved = 0;
+    let testsTruncated = 0;
+    let dataChanged = false;
+    
+    // Enforce 50-run limit per test
+    for (const [testName, runs] of Object.entries(runsData)) {
+      if (runs.length > 50) {
+        const runsToRemove = runs.length - 50;
+        runsData[testName] = runs.slice(-50); // Keep newest 50 runs
+        totalRunsRemoved += runsToRemove;
+        testsTruncated++;
+        dataChanged = true;
+        
+        // Also update flakes data if it exists
+        if (flakesData[testName] && flakesData[testName].runs) {
+          const remainingRunTimestamps = new Set(runsData[testName].map(r => r.ts));
+          flakesData[testName].runs = flakesData[testName].runs.filter(r => 
+            remainingRunTimestamps.has(r.ts)
+          );
+        }
+      }
+    }
+    
+    if (dataChanged) {
+      // Save the limited data back to files
+      fs.writeFileSync('.panoptical/runs.json', JSON.stringify(runsData, null, 2));
+      fs.writeFileSync('.panoptical/flakes.json', JSON.stringify(flakesData, null, 2));
+      
+      console.log(`Auto-enforced limits: Limited ${testsTruncated} tests to 50 runs, removed ${totalRunsRemoved} old runs`);
+    }
+  } catch (error) {
+    console.warn(`Auto-enforcement failed: ${error.message}`);
+  }
+}
+
+// Read test metadata (name, description, file path) from YAML in tests/ directory (recursively searches subdirectories)
 function readTestMeta(testName) {
   try {
     const base = testName.replace(/\.(yaml|yml)$/i, '');
-    const candidates = [
-      path.join('tests', base + '.yaml'),
-      path.join('tests', base + '.yml')
-    ];
-    let foundPath = null;
-    for (const p of candidates) {
-      if (fs.existsSync(p)) {
-        foundPath = p;
-        break;
-      }
+    const testsDir = 'tests';
+    
+    if (!fs.existsSync(testsDir)) {
+      return { file: null, name: testName, description: '' };
     }
+    
+    // Recursively search for the test file
+    function findTestFile(dir) {
+      const items = fs.readdirSync(dir);
+      
+      for (const item of items) {
+        const fullPath = path.join(dir, item);
+        const stat = fs.statSync(fullPath);
+        
+        if (stat.isDirectory()) {
+          // Recursively search subdirectories
+          const found = findTestFile(fullPath);
+          if (found) return found;
+        } else if (item === base + '.yaml' || item === base + '.yml') {
+          // Found the test file
+          return fullPath;
+        }
+      }
+      return null;
+    }
+    
+    const foundPath = findTestFile(testsDir);
+    
     if (!foundPath) {
       return { file: null, name: testName, description: '' };
     }
+    
     const content = fs.readFileSync(foundPath, 'utf8');
     const nameMatch = content.match(/^\s*test:\s*(.+)\s*$/m);
     const descMatch = content.match(/^\s*description:\s*(.+)\s*$/m);
