@@ -295,6 +295,104 @@ export function generateTestDetailsHTML(testName, testData) {
                 padding: 8px;
             }
         }
+        
+        /* Screenshot Modal Styles */
+        .screenshot-btn {
+            background: #475569;
+            border: 1px solid #64748b;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: #e2e8f0;
+            transition: background 0.2s ease;
+        }
+        
+        .screenshot-btn:hover {
+            background: #64748b;
+        }
+        
+        .screenshot-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        
+        .screenshot-modal-content {
+            background-color: #1e293b;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .screenshot-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #475569;
+        }
+        
+        .screenshot-modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+        
+        .screenshot-modal-close {
+            background: #475569;
+            border: 1px solid #64748b;
+            color: #e2e8f0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s ease;
+        }
+        
+        .screenshot-modal-close:hover {
+            background: #64748b;
+        }
+        
+        .screenshot-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid #475569;
+        }
+        
+        .screenshot-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #334155;
+            border-radius: 8px;
+            border: 1px solid #475569;
+        }
+        
+        .screenshot-info h4 {
+            margin: 0 0 10px 0;
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+        
+        .screenshot-info p {
+            margin: 5px 0;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -500,7 +598,7 @@ export function generateTestDetailsHTML(testName, testData) {
                             callbacks: {
                                 title: function(context) {
                                     const run = sortedRuns[context[0].dataIndex];
-                                    return \`Run \${20 - context[0].dataIndex} (\${run.relativeTime})\`;
+                                    return 'Run ' + (20 - context[0].dataIndex) + ' (' + run.relativeTime + ')';
                                 },
                                 label: function(context) {
                                     return context.dataset.label + ': ' + (context.parsed.y === 1 ? 'Pass' : 'Fail');
@@ -586,7 +684,7 @@ export function generateTestDetailsHTML(testName, testData) {
                             callbacks: {
                                 title: function(context) {
                                     const run = sortedRuns[context[0].dataIndex];
-                                    return \`Run \${20 - context[0].dataIndex} (\${run.relativeTime})\`;
+                                    return 'Run ' + (20 - context[0].dataIndex) + ' (' + run.relativeTime + ')';
                                 },
                                 label: function(context) {
                                     const value = context.parsed.y;
@@ -600,14 +698,62 @@ export function generateTestDetailsHTML(testName, testData) {
         }
         
         function toggleErrorDetails(runId) {
-            const errorDetails = document.getElementById(\`error-\${runId}\`);
+            const errorDetails = document.getElementById('error-' + runId);
             if (errorDetails.style.display === 'none') {
                 errorDetails.style.display = 'block';
             } else {
                 errorDetails.style.display = 'none';
             }
         }
+        
+        function showScreenshot(runNumber, base64Data) {
+            const modal = document.getElementById('screenshotModal');
+            const modalTitle = document.getElementById('screenshotModalTitle');
+            const modalImage = document.getElementById('screenshotModalImage');
+            const modalInfo = document.getElementById('screenshotModalInfo');
+            
+            modalTitle.textContent = 'Screenshot for Run #' + runNumber;
+            
+            // Use base64 data directly
+            modalImage.src = 'data:image/png;base64,' + base64Data;
+            modalImage.alt = 'Test failure screenshot for run ' + runNumber;
+            
+            // Update info section
+            modalInfo.innerHTML = '<h4>Screenshot Details</h4>' +
+                '<p><strong>Test Run:</strong> #' + runNumber + '</p>' +
+                '<p><strong>Type:</strong> Failure Screenshot</p>' +
+                '<p><strong>Size:</strong> ' + Math.round(base64Data.length * 0.75 / 1024) + ' KB</p>';
+            
+            modal.style.display = 'block';
+        }
+        
+        function closeScreenshotModal() {
+            document.getElementById('screenshotModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('screenshotModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
     </script>
+    
+    <!-- Screenshot Modal -->
+    <div id="screenshotModal" class="screenshot-modal">
+        <div class="screenshot-modal-content">
+            <div class="screenshot-modal-header">
+                <div class="screenshot-modal-title" id="screenshotModalTitle">Screenshot</div>
+                <button class="screenshot-modal-close" onclick="closeScreenshotModal()">&times;</button>
+            </div>
+            <img id="screenshotModalImage" class="screenshot-image" src="" alt="Screenshot">
+            <div class="screenshot-info" id="screenshotModalInfo">
+                <h4>Screenshot Details</h4>
+                <p>Click on a screenshot button to view details.</p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
   `;
@@ -632,7 +778,16 @@ function generateRunsTableRows(runs) {
     
     let errorRow = '';
     if (run.error) {
-      errorRow = '<tr><td colspan="6"><div class="error-details" id="error-' + runNumber + '"><strong>Error:</strong> ' + run.error + '</div></td></tr>';
+      let errorContent = '<strong>Error:</strong> ' + run.error;
+      
+      // Add screenshot button if available
+      if (run.screenshotInfo) {
+        // Extract base64 data from screenshotInfo (e.g., "Screenshot: base64data")
+        const base64Data = run.screenshotInfo.replace('Screenshot: ', '');
+        errorContent += '<br><br><button onclick="showScreenshot(\'' + runNumber + '\', \'' + base64Data + '\')" class="screenshot-btn"><i class="fas fa-image"></i> View Screenshot</button>';
+      }
+      
+      errorRow = '<tr><td colspan="6"><div class="error-details" id="error-' + runNumber + '">' + errorContent + '</div></td></tr>';
     }
     
     return '<tr>' +

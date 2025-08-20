@@ -14,6 +14,8 @@ export function createReportServer(port = 3000) {
   
   app.use('/static', express.static(path.join(__dirname, 'static')));
   
+
+  
   app.get('/panoptical-logo.png', (req, res) => {
     res.sendFile(path.join(__dirname, 'panoptical-logo.png'));
   });
@@ -287,7 +289,7 @@ function generateDashboardHTML() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panoptical Test Reports</title>
+    <title>Panoptical Test Reports Server</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -746,8 +748,8 @@ function generateDashboardHTML() {
     <div class="container">
         <div class="header">
             <img src="/panoptical-logo.png" alt="Panoptical Logo" style="height: 45px; margin-bottom: 15px;">
-            <h1>Panoptical Test Reports</h1>
-            <p>Comprehensive Testing Dashboard</p>
+            <h1>Test Reports Server</h1>
+            <p>Live Testing Analytics & Insights</p>
             <div class="header-actions">
                 <button id="restart-btn" class="restart-button" onclick="refreshData()" title="Refresh page and fetch latest test data">
                     <i class="fas fa-sync-alt"></i>

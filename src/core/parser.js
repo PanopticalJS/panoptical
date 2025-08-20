@@ -106,8 +106,22 @@ export async function runDeclarativeTest(filePath, options = {}) {
       const filename = path.basename(filePath, '.yaml');
       const failureFilename = screenshotManager.generateTestFailureFilename(filename);
       const failurePath = screenshotManager.getFailureScreenshotPath(failureFilename);
-      await browser.screenshot(failurePath);
-      screenshotInfo = `Screenshot: ${failureFilename}`;
+      
+      // Take screenshot and get buffer (without saving to file)
+      const screenshotBuffer = await browser.screenshot();
+      
+      // Convert buffer to base64 for storage in JSON
+      const base64Screenshot = screenshotBuffer.toString('base64');
+      
+      // Store the base64 data directly in the screenshotInfo
+      screenshotInfo = `Screenshot: ${base64Screenshot}`;
+      
+      // Optionally save to file for local development (but don't use the return value)
+      try {
+        await fs.promises.writeFile(failurePath, screenshotBuffer);
+      } catch (writeError) {
+        console.warn('Could not save screenshot to file:', writeError.message);
+      }
     } catch (screenshotError) {
       console.error('Failed to take failure screenshot:', screenshotError.message);
     }

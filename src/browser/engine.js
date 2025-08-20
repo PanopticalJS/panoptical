@@ -363,11 +363,22 @@ export class PanopticalBrowser {
     }
 
     try {
-      await this.page.screenshot({
-        path,
+      if (path) {
+        // Save to file if path is provided
+        await this.page.screenshot({
+          path,
+          fullPage: options.fullPage || false,
+          ...options
+        });
+      }
+      
+      // Always return the screenshot as a buffer
+      const buffer = await this.page.screenshot({
         fullPage: options.fullPage || false,
         ...options
       });
+      
+      return buffer;
     } catch (error) {
       console.error(`Screenshot failed: ${error.message}`);
       throw error;

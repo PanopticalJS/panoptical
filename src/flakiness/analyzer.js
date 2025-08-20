@@ -4,7 +4,7 @@ import fs from 'fs';
 const RUNS_FILE = '.panoptical/runs.json';
 const FLAKES_FILE = '.panoptical/flakes.json';
 
-export async function logRun(testName, status, duration, error) {
+export async function logRun(testName, status, duration, error, screenshotInfo) {
   const runs = fs.existsSync(RUNS_FILE) ? JSON.parse(fs.readFileSync(RUNS_FILE, 'utf8')) : {};
   if (!runs[testName]) runs[testName] = [];
   
@@ -12,7 +12,8 @@ export async function logRun(testName, status, duration, error) {
     status, 
     ts: Date.now(),
     duration,
-    error
+    error,
+    screenshotInfo: screenshotInfo || null
   };
   
   runs[testName].push(runResult);
